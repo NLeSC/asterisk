@@ -129,7 +129,7 @@ public class AsteriskSettings extends Settings {
 
         try {
             final TypedProperties props = new TypedProperties();
-            props.loadFromFile("settings.properties");
+            props.loadFromClassPath("settings.properties");
 
             // Minimum and maximum values for the brightness sliders
             POSTPROCESSING_OVERALL_BRIGHTNESS_MIN = props
