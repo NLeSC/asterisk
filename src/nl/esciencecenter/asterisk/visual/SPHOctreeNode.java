@@ -94,8 +94,9 @@ public class SPHOctreeNode {
             if (subdivided) {
                 addElementSubdivided(element);
             } else {
-                if (childCounter > settings.getOctreeLOD()) {
-                    if (depth < AsteriskSettings.MAX_OCTREE_DEPTH) {
+                if (childCounter > AsteriskSettings
+                        .getMaxOctreeElementsPerNode()) {
+                    if (depth < settings.getMaxOctreeDepth()) {
                         subDiv();
                         childCounter = 0;
                     } else {
@@ -342,13 +343,13 @@ public class SPHOctreeNode {
                         tmpColor = tmpColor.add(element.getColor());
                     }
                     color = tmpColor.div(elements.size());
-                    color.set(
-                            3,
-                            depth
-                                    * depth
-                                    * depth
-                                    / (float) (AsteriskSettings.MAX_OCTREE_DEPTH
-                                            * AsteriskSettings.MAX_OCTREE_DEPTH * AsteriskSettings.MAX_OCTREE_DEPTH));
+
+                    float alpha = (elements.size() / AsteriskSettings
+                            .getMaxOctreeElementsPerNode())
+                            * (depth * depth * depth)
+                            / (float) (AsteriskSettings.MAX_OCTREE_DEPTH
+                                    * AsteriskSettings.MAX_OCTREE_DEPTH * AsteriskSettings.MAX_OCTREE_DEPTH);
+                    color.set(3, alpha);
 
                     // System.err.println(color);
                 } else {

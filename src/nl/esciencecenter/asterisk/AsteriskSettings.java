@@ -29,48 +29,30 @@ public class AsteriskSettings extends Settings {
     private float POSTPROCESSING_AXES_BRIGHTNESS_MAX = 10f;
     private float POSTPROCESSING_POINT_GAS_BRIGHTNESS_MIN = 0f;
     private float POSTPROCESSING_POINT_GAS_BRIGHTNESS_MAX = 10f;
-    private final float POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_MIN = 0f;
-    private final float POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_MAX = 10f;
+    private float POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_MIN = 0f;
+    private float POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_MAX = 10f;
     private float POSTPROCESSING_STAR_HALO_BRIGHTNESS_MIN = 0f;
     private float POSTPROCESSING_STAR_HALO_BRIGHTNESS_MAX = 10f;
     private float POSTPROCESSING_STAR_BRIGHTNESS_MIN = 0f;
     private float POSTPROCESSING_STAR_BRIGHTNESS_MAX = 10f;
     private float POSTPROCESSING_SPHERE_BRIGHTNESS_MIN = 0f;
     private float POSTPROCESSING_SPHERE_BRIGHTNESS_MAX = 10f;
+    private float POSTPROCESSING_HUD_BRIGHTNESS_MIN = 0f;
+    private float POSTPROCESSING_HUD_BRIGHTNESS_MAX = 10f;
+
+    // Settings for the postprocessing shader
+    private float POSTPROCESSING_OVERALL_BRIGHTNESS_DEF = 5f;
+    private float POSTPROCESSING_AXES_BRIGHTNESS_DEF = 4f;
+    private float POSTPROCESSING_POINT_GAS_BRIGHTNESS_DEF = 4f;
+    private float POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_DEF = 4f;
+    private float POSTPROCESSING_STAR_HALO_BRIGHTNESS_DEF = 4f;
+    private float POSTPROCESSING_STAR_BRIGHTNESS_DEF = 4f;
+    private float POSTPROCESSING_SPHERE_BRIGHTNESS_DEF = 4f;
+    private float POSTPROCESSING_HUD_BRIGHTNESS_DEF = 4f;
 
     private final float PARTICLE_SIZE_MULTIPLIER_MIN = 1f;
     private float PARTICLE_SIZE_MULTIPLIER_DEF = 10f;
     private final float PARTICLE_SIZE_MULTIPLIER_MAX = 100f;
-
-    private final int OCTREE_LOD_MIN = 1;
-    private int OCTREE_LOD_DEF = 5;
-    private final int OCTREE_LOD_MAX = 25;
-
-    private final float OCTREE_DENSITY_MIN = 1f;
-    private float OCTREE_DENSITY_DEF = 10f;
-    private final float OCTREE_DENSITY_MAX = 100f;
-
-    private float POSTPROCESSING_HUD_BRIGHTNESS_MIN = 0f;
-    private float POSTPROCESSING_HUD_BRIGHTNESS_MAX = 10f;
-    // Settings for the postprocessing shader
-    private float POSTPROCESSING_OVERALL_BRIGHTNESS_DEF = 10f;
-    private float POSTPROCESSING_AXES_BRIGHTNESS_DEF = 1f;
-    private float POSTPROCESSING_POINT_GAS_BRIGHTNESS_DEF = 1f;
-    private float POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_DEF = 1f;
-    private float POSTPROCESSING_STAR_HALO_BRIGHTNESS_DEF = 1f;
-    private float POSTPROCESSING_STAR_BRIGHTNESS_DEF = 1f;
-    private float POSTPROCESSING_SPHERE_BRIGHTNESS_DEF = 1f;
-
-    private float POSTPROCESSING_HUD_BRIGHTNESS_DEF = 3f;
-    // Settings for the star-shape blur method (the + shape of stars)
-    private int STAR_SHAPE_BLUR_SIZE = 1;
-    private float STAR_SHAPE_BLURFILTER_SIZE = 8f;
-    private float STAR_SHAPE_SIGMA = 100f;
-    private float STAR_SHAPE_ALPHA = 0.5f;
-
-    private int STAR_SHAPE_BLUR_TYPE = 0;
-    // Settings for the detail levels.
-    // private int LEVEL_OF_DETAIL = 0;
 
     private final int SLIDER_MIN_BLUR_TYPE = 1;
     private final int SLIDER_DEF_BLUR_TYPE = 1;
@@ -83,42 +65,6 @@ public class AsteriskSettings extends Settings {
     private final int SLIDER_MIN_BLUR_SIZE = 2;
     private final int SLIDER_DEF_BLUR_SIZE = 2;
     private final int SLIDER_MAX_BLUR_SIZE = 8;
-
-    private int LOW_STAR_HALO_BLUR_PASSES = 1;
-    private float LOW_STAR_HALO_BLUR_SIZE = 1;
-    private int LOW_STAR_HALO_BLUR_TYPE = 6;
-
-    private int LOW_GAS_SUBDIVISION = 0;
-    private int LOW_STAR_SUBDIVISION = 1;
-
-    private int LOW_GAS_PARTICLES_PER_OCTREE_NODE = 100;
-
-    private int MEDIUM_STAR_HALO_BLUR_PASSES = 1;
-    private float MEDIUM_STAR_HALO_BLUR_SIZE = 1;
-    private int MEDIUM_STAR_HALO_BLUR_TYPE = 6;
-
-    private int MEDIUM_GAS_SUBDIVISION = 1;
-    private int MEDIUM_STAR_SUBDIVISION = 2;
-
-    private int MEDIUM_GAS_PARTICLES_PER_OCTREE_NODE = 25;
-
-    private int HIGH_STAR_HALO_BLUR_PASSES = 2;
-    private float HIGH_STAR_HALO_BLUR_SIZE = 1;
-    private int HIGH_STAR_HALO_BLUR_TYPE = 6;
-
-    private int HIGH_GAS_SUBDIVISION = 1;
-    private int HIGH_STAR_SUBDIVISION = 3;
-
-    private int HIGH_GAS_PARTICLES_PER_OCTREE_NODE = 5;
-    // Snaphots have different settings, since they are rendered at extremely
-    // high resolutions pixels
-    private int SNAPSHOT_GAS_BLUR_PASSES = 2; // 2
-    private float SNAPSHOT_GAS_BLUR_SIZE = 2; // 6
-    private int SNAPSHOT_GAS_BLUR_TYPE = 8; // 10
-
-    private int SNAPSHOT_STAR_HALO_BLUR_PASSES = 2; // 2
-    private float SNAPSHOT_STAR_HALO_BLUR_SIZE = 1; // 1
-    private int SNAPSHOT_STAR_HALO_BLUR_TYPE = 6; // 6
 
     private boolean GAS_COLOR_INVERTED = false;
     private boolean GAS_COLOR_BACKGROUND_INVERTED = false;
@@ -144,13 +90,21 @@ public class AsteriskSettings extends Settings {
 
     private int PREPROCESSING_AMOUNT = 5;
 
-    private int blurTypeSetting;
-    private int blurPassSetting;
-    private int blurSizeSetting;
+    private int pointGasBlurTypeSetting;
+    private int pointGasBlurPassSetting;
+    private int pointGasBlurSizeSetting;
+
+    private int octreeGasBlurTypeSetting;
+    private int octreeGasBlurPassSetting;
+    private int octreeGasBlurSizeSetting;
+
+    private int starHaloBlurTypeSetting;
+    private int starHaloBlurPassSetting;
+    private int starHaloBlurSizeSetting;
 
     private float gasOpacityRatio = 10;
 
-    public static final int MAX_ELEMENTS = 10;
+    public static final int MAX_OCTREE_ELEMENTS_PER_NODE = 5;
     public static final int MAX_OCTREE_DEPTH = 25;
 
     public static final float INITIAL_OCTREE_SIZE = 500f;
@@ -190,9 +144,9 @@ public class AsteriskSettings extends Settings {
                     .getFloatProperty("POSTPROCESSING_POINT_GAS_BRIGHTNESS_MIN");
             POSTPROCESSING_POINT_GAS_BRIGHTNESS_MAX = props
                     .getFloatProperty("POSTPROCESSING_POINT_GAS_BRIGHTNESS_MAX");
-            POSTPROCESSING_POINT_GAS_BRIGHTNESS_MIN = props
+            POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_MIN = props
                     .getFloatProperty("POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_MIN");
-            POSTPROCESSING_POINT_GAS_BRIGHTNESS_MAX = props
+            POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_MAX = props
                     .getFloatProperty("POSTPROCESSING_OCTREE_GAS_BRIGHTNESS_MAX");
             POSTPROCESSING_STAR_HALO_BRIGHTNESS_MIN = props
                     .getFloatProperty("POSTPROCESSING_STAR_HALO_BRIGHTNESS_MIN");
@@ -228,91 +182,6 @@ public class AsteriskSettings extends Settings {
             POSTPROCESSING_SPHERE_BRIGHTNESS_DEF = props
                     .getFloatProperty("POSTPROCESSING_SPHERE_BRIGHTNESS_DEF");
 
-            // Settings for the star-shape blur method (the + shape of stars)
-            STAR_SHAPE_BLUR_SIZE = props.getIntProperty("STAR_SHAPE_BLUR_SIZE");
-            STAR_SHAPE_BLURFILTER_SIZE = props
-                    .getFloatProperty("STAR_SHAPE_BLURFILTER_SIZE");
-            STAR_SHAPE_SIGMA = props.getFloatProperty("STAR_SHAPE_SIGMA");
-            STAR_SHAPE_ALPHA = props.getFloatProperty("STAR_SHAPE_ALPHA");
-            STAR_SHAPE_BLUR_TYPE = props.getIntProperty("STAR_SHAPE_BLUR_TYPE");
-
-            // Settings for the detail levels.
-            // LEVEL_OF_DETAIL = props.getIntProperty("LEVEL_OF_DETAIL");
-
-            // LOW_GAS_BLUR_PASSES =
-            // props.getIntProperty("LOW_GAS_BLUR_PASSES");
-            // LOW_GAS_BLUR_SIZE = props.getFloatProperty("LOW_GAS_BLUR_SIZE");
-            // LOW_GAS_BLUR_TYPE = props.getIntProperty("LOW_GAS_BLUR_TYPE");
-
-            LOW_STAR_HALO_BLUR_PASSES = props
-                    .getIntProperty("LOW_STAR_HALO_BLUR_PASSES");
-            LOW_STAR_HALO_BLUR_SIZE = props
-                    .getFloatProperty("LOW_STAR_HALO_BLUR_SIZE");
-            LOW_STAR_HALO_BLUR_TYPE = props
-                    .getIntProperty("LOW_STAR_HALO_BLUR_TYPE");
-
-            LOW_GAS_SUBDIVISION = props.getIntProperty("LOW_GAS_SUBDIVISION");
-            LOW_STAR_SUBDIVISION = props.getIntProperty("LOW_STAR_SUBDIVISION");
-            LOW_GAS_PARTICLES_PER_OCTREE_NODE = props
-                    .getIntProperty("LOW_GAS_PARTICLES_PER_OCTREE_NODE");
-
-            // MEDIUM_GAS_BLUR_PASSES = props
-            // .getIntProperty("MEDIUM_GAS_BLUR_PASSES");
-            // MEDIUM_GAS_BLUR_SIZE = props
-            // .getFloatProperty("MEDIUM_GAS_BLUR_SIZE");
-            // MEDIUM_GAS_BLUR_TYPE =
-            // props.getIntProperty("MEDIUM_GAS_BLUR_TYPE");
-
-            MEDIUM_STAR_HALO_BLUR_PASSES = props
-                    .getIntProperty("MEDIUM_STAR_HALO_BLUR_PASSES");
-            MEDIUM_STAR_HALO_BLUR_SIZE = props
-                    .getFloatProperty("MEDIUM_STAR_HALO_BLUR_SIZE");
-            MEDIUM_STAR_HALO_BLUR_TYPE = props
-                    .getIntProperty("MEDIUM_STAR_HALO_BLUR_TYPE");
-
-            MEDIUM_GAS_SUBDIVISION = props
-                    .getIntProperty("MEDIUM_GAS_SUBDIVISION");
-            MEDIUM_STAR_SUBDIVISION = props
-                    .getIntProperty("MEDIUM_STAR_SUBDIVISION");
-            MEDIUM_GAS_PARTICLES_PER_OCTREE_NODE = props
-                    .getIntProperty("MEDIUM_GAS_PARTICLES_PER_OCTREE_NODE");
-
-            // HIGH_GAS_BLUR_PASSES =
-            // props.getIntProperty("HIGH_GAS_BLUR_PASSES");
-            // HIGH_GAS_BLUR_SIZE =
-            // props.getFloatProperty("HIGH_GAS_BLUR_SIZE");
-            // HIGH_GAS_BLUR_TYPE = props.getIntProperty("HIGH_GAS_BLUR_TYPE");
-
-            HIGH_STAR_HALO_BLUR_PASSES = props
-                    .getIntProperty("HIGH_STAR_HALO_BLUR_PASSES");
-            HIGH_STAR_HALO_BLUR_SIZE = props
-                    .getFloatProperty("HIGH_STAR_HALO_BLUR_SIZE");
-            HIGH_STAR_HALO_BLUR_TYPE = props
-                    .getIntProperty("HIGH_STAR_HALO_BLUR_TYPE");
-
-            HIGH_GAS_SUBDIVISION = props.getIntProperty("HIGH_GAS_SUBDIVISION");
-            HIGH_STAR_SUBDIVISION = props
-                    .getIntProperty("HIGH_STAR_SUBDIVISION");
-            HIGH_GAS_PARTICLES_PER_OCTREE_NODE = props
-                    .getIntProperty("HIGH_GAS_PARTICLES_PER_OCTREE_NODE");
-
-            // Snaphots have different settings, since they are rendered at
-            // extremely
-            // high resolutions pixels
-            SNAPSHOT_GAS_BLUR_PASSES = props
-                    .getIntProperty("SNAPSHOT_GAS_BLUR_PASSES");
-            SNAPSHOT_GAS_BLUR_SIZE = props
-                    .getFloatProperty("SNAPSHOT_GAS_BLUR_SIZE");
-            SNAPSHOT_GAS_BLUR_TYPE = props
-                    .getIntProperty("SNAPSHOT_GAS_BLUR_TYPE");
-
-            SNAPSHOT_STAR_HALO_BLUR_PASSES = props
-                    .getIntProperty("SNAPSHOT_STAR_HALO_BLUR_PASSES");
-            SNAPSHOT_STAR_HALO_BLUR_SIZE = props
-                    .getFloatProperty("SNAPSHOT_STAR_HALO_BLUR_SIZE");
-            SNAPSHOT_STAR_HALO_BLUR_TYPE = props
-                    .getIntProperty("SNAPSHOT_STAR_HALO_BLUR_TYPE");
-
             GAS_COLOR_INVERTED = props.getBooleanProperty("GAS_COLOR_INVERTED");
             GAS_COLOR_BACKGROUND_INVERTED = props
                     .getBooleanProperty("GAS_COLOR_BACKGROUND_INVERTED");
@@ -338,6 +207,7 @@ public class AsteriskSettings extends Settings {
                     .getIntProperty("BEZIER_INTERPOLATION_STEPS");
 
             PREPROCESSING_AMOUNT = props.getIntProperty("PREPROCESSING_AMOUNT");
+
         } catch (NumberFormatException e) {
             logger.debug(e.getMessage());
         }
@@ -348,9 +218,18 @@ public class AsteriskSettings extends Settings {
         // currentDescription = new GlueSceneDescription(0, 0, "default", 0f,
         // 25f);
 
-        blurTypeSetting = SLIDER_DEF_BLUR_TYPE;
-        blurPassSetting = SLIDER_DEF_BLUR_PASSES;
-        blurSizeSetting = SLIDER_DEF_BLUR_SIZE;
+        pointGasBlurTypeSetting = SLIDER_DEF_BLUR_TYPE;
+        pointGasBlurPassSetting = SLIDER_DEF_BLUR_PASSES;
+        pointGasBlurSizeSetting = SLIDER_DEF_BLUR_SIZE;
+
+        octreeGasBlurTypeSetting = SLIDER_DEF_BLUR_TYPE;
+        octreeGasBlurPassSetting = SLIDER_DEF_BLUR_PASSES;
+        octreeGasBlurSizeSetting = SLIDER_DEF_BLUR_SIZE;
+
+        starHaloBlurTypeSetting = SLIDER_DEF_BLUR_TYPE;
+        starHaloBlurPassSetting = SLIDER_DEF_BLUR_PASSES;
+        starHaloBlurSizeSetting = SLIDER_DEF_BLUR_SIZE;
+
     }
 
     public GlueSceneDescription getCurrentDescription() {
@@ -411,32 +290,8 @@ public class AsteriskSettings extends Settings {
         return GAS_COLOR_INVERTED;
     }
 
-    public int getGasParticlesPerOctreeNode() {
-        switch (currentDescription.getLevelOfDetail()) {
-        case 0:
-            return LOW_GAS_PARTICLES_PER_OCTREE_NODE;
-        case 1:
-            return MEDIUM_GAS_PARTICLES_PER_OCTREE_NODE;
-        case 2:
-            return HIGH_GAS_PARTICLES_PER_OCTREE_NODE;
-        }
-        return 0;
-    }
-
     public boolean getGasStarInfluencedColor() {
         return GAS_COLOR_FROM_STARS;
-    }
-
-    public int getGasSubdivision() {
-        switch (currentDescription.getLevelOfDetail()) {
-        case 0:
-            return LOW_GAS_SUBDIVISION;
-        case 1:
-            return MEDIUM_GAS_SUBDIVISION;
-        case 2:
-            return HIGH_GAS_SUBDIVISION;
-        }
-        return 0;
     }
 
     public float getPostprocessingAxesBrightness() {
@@ -547,124 +402,8 @@ public class AsteriskSettings extends Settings {
         return PARTICLE_SIZE_MULTIPLIER_DEF;
     }
 
-    public int getOctreeLODMin() {
-        return OCTREE_LOD_MIN;
-    }
-
-    public int getOctreeLODMax() {
-        return OCTREE_LOD_MAX;
-    }
-
-    public int getOctreeLOD() {
-        return OCTREE_LOD_DEF;
-    }
-
-    public float getOctreeDensityMin() {
-        return OCTREE_DENSITY_MIN;
-    }
-
-    public float getOctreeDensityMax() {
-        return OCTREE_DENSITY_MAX;
-    }
-
-    public float getOctreeDensity() {
-        return OCTREE_DENSITY_DEF;
-    }
-
-    public int getSnapshotGasBlurPasses() {
-        return SNAPSHOT_GAS_BLUR_PASSES;
-    }
-
-    public float getSnapshotGasBlurSize() {
-        return SNAPSHOT_GAS_BLUR_SIZE;
-    }
-
-    public int getSnapshotGasBlurType() {
-        return SNAPSHOT_GAS_BLUR_TYPE;
-    }
-
-    public int getSnapshotStarHaloBlurPasses() {
-        return SNAPSHOT_STAR_HALO_BLUR_PASSES;
-    }
-
-    public float getSnapshotStarHaloBlurSize() {
-        return SNAPSHOT_STAR_HALO_BLUR_SIZE;
-    }
-
-    public int getSnapshotStarHaloBlurType() {
-        return SNAPSHOT_STAR_HALO_BLUR_TYPE;
-    }
-
     public boolean getStarColorsExaggerated() {
         return STAR_COLORS_EXAGGERATED;
-    }
-
-    public int getStarHaloBlurPasses() {
-        switch (currentDescription.getLevelOfDetail()) {
-        case 0:
-            return LOW_STAR_HALO_BLUR_PASSES;
-        case 1:
-            return MEDIUM_STAR_HALO_BLUR_PASSES;
-        case 2:
-            return HIGH_STAR_HALO_BLUR_PASSES;
-        }
-        return 0;
-    }
-
-    public float getStarHaloBlurSize() {
-        switch (currentDescription.getLevelOfDetail()) {
-        case 0:
-            return LOW_STAR_HALO_BLUR_SIZE;
-        case 1:
-            return MEDIUM_STAR_HALO_BLUR_SIZE;
-        case 2:
-            return HIGH_STAR_HALO_BLUR_SIZE;
-        }
-        return 0;
-    }
-
-    public int getStarHaloBlurType() {
-        switch (currentDescription.getLevelOfDetail()) {
-        case 0:
-            return LOW_STAR_HALO_BLUR_TYPE;
-        case 1:
-            return MEDIUM_STAR_HALO_BLUR_TYPE;
-        case 2:
-            return HIGH_STAR_HALO_BLUR_TYPE;
-        }
-        return 0;
-    }
-
-    public float getStarShapeAlpha() {
-        return STAR_SHAPE_ALPHA;
-    }
-
-    public float getStarShapeBlurfilterSize() {
-        return STAR_SHAPE_BLURFILTER_SIZE;
-    }
-
-    public int getStarShapeBlurSize() {
-        return STAR_SHAPE_BLUR_SIZE;
-    }
-
-    public int getStarShapeBlurType() {
-        return STAR_SHAPE_BLUR_TYPE;
-    }
-
-    public float getStarShapeSigma() {
-        return STAR_SHAPE_SIGMA;
-    }
-
-    public int getStarSubdivision() {
-        switch (currentDescription.getLevelOfDetail()) {
-        case 0:
-            return LOW_STAR_SUBDIVISION;
-        case 1:
-            return MEDIUM_STAR_SUBDIVISION;
-        case 2:
-            return HIGH_STAR_SUBDIVISION;
-        }
-        return 0;
     }
 
     public long getWaitTimeMovie() {
@@ -727,14 +466,6 @@ public class AsteriskSettings extends Settings {
 
     public void setParticleSizeMultiplier(float value) {
         PARTICLE_SIZE_MULTIPLIER_DEF = value;
-    }
-
-    public void setOctreeLOD(int value) {
-        OCTREE_LOD_DEF = value;
-    }
-
-    public void setOctreeDensity(float value) {
-        OCTREE_DENSITY_DEF = value;
     }
 
     public void setStarColorsExaggerated(int stateChange) {
@@ -864,30 +595,6 @@ public class AsteriskSettings extends Settings {
         gasOpacityRatio = value;
     }
 
-    public int getBlurTypeSetting() {
-        return blurTypeSetting;
-    }
-
-    public void setBlurTypeSetting(int blurTypeSetting) {
-        this.blurTypeSetting = blurTypeSetting;
-    }
-
-    public int getBlurPassSetting() {
-        return blurPassSetting;
-    }
-
-    public void setBlurPassSetting(int blurPassSetting) {
-        this.blurPassSetting = blurPassSetting;
-    }
-
-    public int getBlurSizeSetting() {
-        return blurSizeSetting;
-    }
-
-    public void setBlurSizeSetting(int blurSizeSetting) {
-        this.blurSizeSetting = blurSizeSetting;
-    }
-
     public int getBlurTypeMin() {
         return SLIDER_MIN_BLUR_TYPE;
     }
@@ -927,5 +634,155 @@ public class AsteriskSettings extends Settings {
     @Override
     public String getScreenshotPath() {
         return SCREENSHOT_PATH;
+    }
+
+    /**
+     * @return the octreeGasBlurTypeSetting
+     */
+    public int getOctreeGasBlurTypeSetting() {
+        return octreeGasBlurTypeSetting;
+    }
+
+    /**
+     * @param octreeGasBlurTypeSetting
+     *            the octreeGasBlurTypeSetting to set
+     */
+    public void setOctreeGasBlurTypeSetting(int octreeGasBlurTypeSetting) {
+        this.octreeGasBlurTypeSetting = octreeGasBlurTypeSetting;
+    }
+
+    /**
+     * @return the octreeGasBlurPassSetting
+     */
+    public int getOctreeGasBlurPassSetting() {
+        return octreeGasBlurPassSetting;
+    }
+
+    /**
+     * @param octreeGasBlurPassSetting
+     *            the octreeGasBlurPassSetting to set
+     */
+    public void setOctreeGasBlurPassSetting(int octreeGasBlurPassSetting) {
+        this.octreeGasBlurPassSetting = octreeGasBlurPassSetting;
+    }
+
+    /**
+     * @return the octreeGasBlurSizeSetting
+     */
+    public int getOctreeGasBlurSizeSetting() {
+        return octreeGasBlurSizeSetting;
+    }
+
+    /**
+     * @param octreeGasBlurSizeSetting
+     *            the octreeGasBlurSizeSetting to set
+     */
+    public void setOctreeGasBlurSizeSetting(int octreeGasBlurSizeSetting) {
+        this.octreeGasBlurSizeSetting = octreeGasBlurSizeSetting;
+    }
+
+    /**
+     * @return the starHaloBlurTypeSetting
+     */
+    public int getStarHaloBlurTypeSetting() {
+        return starHaloBlurTypeSetting;
+    }
+
+    /**
+     * @param starHaloBlurTypeSetting
+     *            the starHaloBlurTypeSetting to set
+     */
+    public void setStarHaloBlurTypeSetting(int starHaloBlurTypeSetting) {
+        this.starHaloBlurTypeSetting = starHaloBlurTypeSetting;
+    }
+
+    /**
+     * @return the starHaloBlurPassSetting
+     */
+    public int getStarHaloBlurPassSetting() {
+        return starHaloBlurPassSetting;
+    }
+
+    /**
+     * @param starHaloBlurPassSetting
+     *            the starHaloBlurPassSetting to set
+     */
+    public void setStarHaloBlurPassSetting(int starHaloBlurPassSetting) {
+        this.starHaloBlurPassSetting = starHaloBlurPassSetting;
+    }
+
+    /**
+     * @return the starHaloBlurSizeSetting
+     */
+    public int getStarHaloBlurSizeSetting() {
+        return starHaloBlurSizeSetting;
+    }
+
+    /**
+     * @param starHaloBlurSizeSetting
+     *            the starHaloBlurSizeSetting to set
+     */
+    public void setStarHaloBlurSizeSetting(int starHaloBlurSizeSetting) {
+        this.starHaloBlurSizeSetting = starHaloBlurSizeSetting;
+    }
+
+    /**
+     * @param pointGasBlurTypeSetting
+     *            the pointGasBlurTypeSetting to set
+     */
+    public void setPointGasBlurTypeSetting(int pointGasBlurTypeSetting) {
+        this.pointGasBlurTypeSetting = pointGasBlurTypeSetting;
+    }
+
+    /**
+     * @param pointGasBlurPassSetting
+     *            the pointGasBlurPassSetting to set
+     */
+    public void setPointGasBlurPassSetting(int pointGasBlurPassSetting) {
+        this.pointGasBlurPassSetting = pointGasBlurPassSetting;
+    }
+
+    /**
+     * @param pointGasBlurSizeSetting
+     *            the pointGasBlurSizeSetting to set
+     */
+    public void setPointGasBlurSizeSetting(int pointGasBlurSizeSetting) {
+        this.pointGasBlurSizeSetting = pointGasBlurSizeSetting;
+    }
+
+    /**
+     * @return the maxOctreeElementsPerNode
+     */
+    public static int getMaxOctreeElementsPerNode() {
+        return MAX_OCTREE_ELEMENTS_PER_NODE;
+    }
+
+    /**
+     * @return the maxOctreeDepth
+     */
+    @Override
+    public int getMaxOctreeDepth() {
+        return MAX_OCTREE_DEPTH;
+    }
+
+    /**
+     * @return the pointGasBlurTypeSetting
+     */
+    public int getPointGasBlurTypeSetting() {
+        return pointGasBlurTypeSetting;
+    }
+
+    /**
+     * @return the pointGasBlurPassSetting
+     */
+    public int getPointGasBlurPassSetting() {
+        return pointGasBlurPassSetting;
+    }
+
+    /**
+     * @return the pointGasBlurSizeSetting
+     */
+    public int getPointGasBlurSizeSetting() {
+        return pointGasBlurSizeSetting;
     }
 }

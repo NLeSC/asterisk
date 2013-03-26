@@ -45,9 +45,9 @@ import nl.esciencecenter.esight.text.jogampExperimental.FontFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AsteriskNewtWindow implements GLEventListener {
+public class AsteriskGLEventListener implements GLEventListener {
     private final static Logger logger = LoggerFactory
-            .getLogger(AsteriskNewtWindow.class);
+            .getLogger(AsteriskGLEventListener.class);
 
     private ShaderProgram animatedTurbulenceShader, pplShader, starHaloShader,
             axesShader, pointGasShader, octreeGasShader, postprocessShader,
@@ -94,7 +94,7 @@ public class AsteriskNewtWindow implements GLEventListener {
     protected final float zNear = 0.1f;
     protected final float zFar = 3000.0f;
 
-    public AsteriskNewtWindow(AsteriskInputHandler inputHandler) {
+    public AsteriskGLEventListener(AsteriskInputHandler inputHandler) {
         this.loader = new ShaderProgramLoader();
         this.inputHandler = inputHandler;
         this.font = FontFactory.get(fontSet).getDefault();
@@ -335,8 +335,9 @@ public class AsteriskNewtWindow implements GLEventListener {
 
         pointGasFBO.unBind(gl);
 
-        blur(gl, pointGasFBO, FSQ_blur, settings.getBlurPassSetting(),
-                settings.getBlurTypeSetting(), settings.getBlurSizeSetting());
+        blur(gl, pointGasFBO, FSQ_blur, settings.getPointGasBlurPassSetting(),
+                settings.getPointGasBlurTypeSetting(),
+                settings.getPointGasBlurSizeSetting());
     }
 
     private void renderOctreeGas(GL3 gl, MatF4 mv, VisualScene newScene)
@@ -354,8 +355,10 @@ public class AsteriskNewtWindow implements GLEventListener {
         gl.glEnable(GL.GL_DEPTH_TEST);
 
         octreeGasFBO.unBind(gl);
-        blur(gl, octreeGasFBO, FSQ_blur, settings.getBlurPassSetting(),
-                settings.getBlurTypeSetting(), settings.getBlurSizeSetting());
+        blur(gl, octreeGasFBO, FSQ_blur,
+                settings.getOctreeGasBlurPassSetting(),
+                settings.getOctreeGasBlurTypeSetting(),
+                settings.getOctreeGasBlurSizeSetting());
     }
 
     private void renderSpheres(GL3 gl, MatF4 mv, VisualScene newScene)
@@ -427,8 +430,9 @@ public class AsteriskNewtWindow implements GLEventListener {
         newScene.drawStars(gl, starHaloShader, mv);
 
         starHaloFBO.unBind(gl);
-        blur(gl, starHaloFBO, FSQ_blur, settings.getStarHaloBlurPasses(),
-                settings.getStarHaloBlurType(), settings.getStarHaloBlurSize());
+        blur(gl, starHaloFBO, FSQ_blur, settings.getStarHaloBlurPassSetting(),
+                settings.getStarHaloBlurTypeSetting(),
+                settings.getStarHaloBlurSizeSetting());
     }
 
     private void renderAxes(GL3 gl, MatF4 mv) throws UninitializedException {
@@ -557,8 +561,6 @@ public class AsteriskNewtWindow implements GLEventListener {
 
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int w, int h) {
-        System.err.println("RESHAPE");
-
         final GL3 gl = drawable.getGL().getGL3();
 
         canvasWidth = w;

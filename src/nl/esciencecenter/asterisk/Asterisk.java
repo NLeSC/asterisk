@@ -12,21 +12,23 @@ public class Asterisk {
             .getInstance();
 
     private static AsteriskInterfaceWindow amusePanel;
-    private static AsteriskNewtWindow amuseWindow;
+    private static AsteriskGLEventListener amuseWindow;
 
     public Asterisk() {
         // Create the Swing interface elements
         amusePanel = new AsteriskInterfaceWindow();
 
         // Create the GLEventListener
-        amuseWindow = new AsteriskNewtWindow(AsteriskInputHandler.getInstance());
+        amuseWindow = new AsteriskGLEventListener(
+                AsteriskInputHandler.getInstance());
 
         new ESightNewtWindow(true, amuseWindow.getInputHandler(), amuseWindow,
                 settings.getDefaultScreenWidth(),
-                settings.getDefaultScreenHeight(), "Amuse Visualization");
+                settings.getDefaultScreenHeight(),
+                "Asterisk - Amuse Visualization Tool");
 
         // Create the frame
-        final JFrame frame = new JFrame("Amuse Visualization");
+        final JFrame frame = new JFrame("- * -");
         frame.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent arg0) {
@@ -126,8 +128,8 @@ public class Asterisk {
                     (float) Math.random(), (float) Math.random() };
             pGas1[i] = new PointGas(i, coordinates, color);
         }
-        Snapshot scene1 = new Snapshot("willekeurig", spheres1, stars1, null,
-                pGas1);
+        Snapshot scene1 = new Snapshot("willekeurig", spheres1, stars1,
+                sphGas1, pGas1);
         lib.addScene(scene1);
 
         for (int j = 0; j < SCENES; j++) {
