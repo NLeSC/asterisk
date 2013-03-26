@@ -425,6 +425,8 @@ public class AsteriskGLEventListener implements GLEventListener {
             e.printStackTrace();
         }
 
+        System.err.println(cameraPos);
+
         starHaloShader.setUniformVector("CameraPos", cameraPos);
 
         newScene.drawStars(gl, starHaloShader, mv);
