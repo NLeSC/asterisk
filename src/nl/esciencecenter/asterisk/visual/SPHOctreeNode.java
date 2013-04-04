@@ -68,7 +68,7 @@ public class SPHOctreeNode {
         this.depth = depth;
         this.center = center;
         this.cubeSize = size;
-        this.modelScale = size * 2f;
+        this.modelScale = size * 3f;
         this.elements = new ArrayList<SPHOctreeElement>();
         this.childCounter = 0;
         this.description = description;
@@ -200,6 +200,9 @@ public class SPHOctreeNode {
                 program.setUniform("node_scale", modelScale);
                 program.setUniformVector("Color", color);
                 program.setUniformMatrix("node_MVmatrix", TMatrix);
+
+                program.setUniformMatrix("node_NormalMatrix",
+                        MatrixFMath.getNormalMatrix(TMatrix));
 
                 try {
                     program.use(gl);
@@ -349,7 +352,7 @@ public class SPHOctreeNode {
                             * (depth * depth * depth)
                             / (float) (AsteriskSettings.MAX_OCTREE_DEPTH
                                     * AsteriskSettings.MAX_OCTREE_DEPTH * AsteriskSettings.MAX_OCTREE_DEPTH);
-                    color.set(3, alpha);
+                    color.set(3, alpha * alpha);
 
                     // System.err.println(color);
                 } else {

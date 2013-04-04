@@ -204,6 +204,10 @@ public class GlueScene implements Runnable, VisualScene {
             MatF4 MVMatrix) {
         if (gasOctree != null) {
             program.setUniformMatrix("MVMatrix", MVMatrix);
+
+            program.setUniformMatrix("NormalMatrix",
+                    MatrixFMath.getNormalMatrix(MVMatrix));
+
             gasOctree.draw(gl, program);
         }
     }

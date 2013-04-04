@@ -17,8 +17,7 @@ uniform vec3 CameraPos;
 
 void main() 
 {	 
-    vertex_normal = normalize(NormalMatrix * MCnormal);
-    
+    vertex_normal = normalize(NormalMatrix * MCnormal);    
     eye_direction = normalize(NormalMatrix * CameraPos);
         
     gl_Position = PMatrix * MVMatrix * SMatrix * ScaleMatrix * MCvertex;

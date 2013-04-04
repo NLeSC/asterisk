@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.media.opengl.GL3;
 
 import nl.esciencecenter.asterisk.Star;
+import nl.esciencecenter.esight.exceptions.InverseNotAvailableException;
 import nl.esciencecenter.esight.exceptions.UninitializedException;
 import nl.esciencecenter.esight.math.MatF4;
 import nl.esciencecenter.esight.math.MatrixFMath;
@@ -59,6 +60,21 @@ public class StarModel {
 
         MatF4 newM = MVMatrix.mul(MatrixFMath.translate(coords));
         program.setUniformMatrix("MVMatrix", newM);
+
+        program.setUniformMatrix("NormalMatrix",
+                MatrixFMath.getNormalMatrix(newM));
+
+        VecF3 cameraPos;
+        try {
+            MatF4 viewModel = MatrixFMath.inverse(newM);
+            cameraPos = new VecF3(viewModel.get(3), viewModel.get(7),
+                    viewModel.get(11));
+        } catch (InverseNotAvailableException e) {
+            cameraPos = new VecF3();
+            e.printStackTrace();
+        }
+
+        program.setUniformVector("CameraPos", cameraPos);
 
         program.setUniformVector("Color", color);
         program.setUniform("OffsetRandomValue", offsetRandomValue);

@@ -104,7 +104,7 @@ public class AsteriskSettings extends Settings {
 
     private float gasOpacityRatio = 10;
 
-    public static final int MAX_OCTREE_ELEMENTS_PER_NODE = 5;
+    public static int MAX_OCTREE_ELEMENTS_PER_NODE = 2;
     public static final int MAX_OCTREE_DEPTH = 25;
 
     public static final float INITIAL_OCTREE_SIZE = 500f;
@@ -205,6 +205,8 @@ public class AsteriskSettings extends Settings {
                     .getBooleanProperty("BEZIER_INTERPOLATION");
             BEZIER_INTERPOLATION_STEPS = props
                     .getIntProperty("BEZIER_INTERPOLATION_STEPS");
+            MAX_OCTREE_ELEMENTS_PER_NODE = props
+                    .getIntProperty("MAX_OCTREE_ELEMENTS_PER_NODE");
 
             PREPROCESSING_AMOUNT = props.getIntProperty("PREPROCESSING_AMOUNT");
 

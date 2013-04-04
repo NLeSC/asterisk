@@ -23,11 +23,9 @@ import nl.esciencecenter.asterisk.interfaces.TimedPlayer;
 import nl.esciencecenter.asterisk.interfaces.VisualScene;
 import nl.esciencecenter.esight.datastructures.FBO;
 import nl.esciencecenter.esight.datastructures.IntPBO;
-import nl.esciencecenter.esight.exceptions.InverseNotAvailableException;
 import nl.esciencecenter.esight.exceptions.UninitializedException;
 import nl.esciencecenter.esight.input.InputHandler;
 import nl.esciencecenter.esight.math.Color4;
-import nl.esciencecenter.esight.math.MatF3;
 import nl.esciencecenter.esight.math.MatF4;
 import nl.esciencecenter.esight.math.MatrixFMath;
 import nl.esciencecenter.esight.math.Point4;
@@ -432,20 +430,6 @@ public class AsteriskGLEventListener implements GLEventListener {
         starHaloShader
                 .setUniformMatrix("SMatrix", MatrixFMath.scale((settings
                         .getParticleSizeMultiplier() * .2f)));
-
-        starHaloShader.setUniformMatrix("NormalMatrix", new MatF3());
-
-        VecF3 cameraPos;
-        try {
-            MatF4 viewModel = MatrixFMath.inverse(mv);
-            cameraPos = new VecF3(viewModel.get(3), viewModel.get(7),
-                    viewModel.get(11));
-        } catch (InverseNotAvailableException e) {
-            cameraPos = new VecF3();
-            e.printStackTrace();
-        }
-
-        starHaloShader.setUniformVector("CameraPos", cameraPos);
 
         newScene.drawStars(gl, starHaloShader, mv);
 
