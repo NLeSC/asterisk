@@ -279,6 +279,7 @@ public class AsteriskInputHandler extends InputHandler implements
      */
     @Override
     public void setRotation(VecF3 rotation) {
+        reset();
         this.rotation = rotation;
     }
 

@@ -13,6 +13,7 @@ public class PointCloud {
     private boolean initialized;
 
     private final int numParticles;
+
     private final FloatBuffer coordinates;
     private final FloatBuffer colors;
 
@@ -38,6 +39,22 @@ public class PointCloud {
             initialized = true;
         }
     }
+
+    // private final GLSLAttrib coordinates;
+    // private final GLSLAttrib colors;
+    //
+    // public PointCloud(VectorList coordinates, VectorList colors) {
+    // this.numParticles = coordinates.size();
+    // this.coordinates = new GLSLAttrib("MCvertex", coordinates);
+    // this.colors = new GLSLAttrib("MCcolor", colors);
+    // }
+    //
+    // public void init(GL3 gl) {
+    // if (!initialized) {
+    // vbo = new VBO(gl, coordinates, colors);
+    // initialized = true;
+    // }
+    // }
 
     public void draw(GL3 gl, ShaderProgram program) {
         vbo.bind(gl);

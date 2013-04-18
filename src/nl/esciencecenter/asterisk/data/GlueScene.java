@@ -112,6 +112,22 @@ public class GlueScene implements Runnable, VisualScene {
                     pointGasColors);
         }
 
+        // PointGas[] pointGasses = scene.getPointGas();
+        // if (pointGasses != null) {
+        // VectorList coords = new VectorList(3, Vector.Type.FLOAT);
+        // VectorList colors = new VectorList(4, Vector.Type.FLOAT);
+        //
+        // for (PointGas gluePointGas : pointGasses) {
+        // float[] v = gluePointGas.getCoordinates();
+        // coords.add(new VecF3(v[0], v[1], v[2]));
+        //
+        // float[] c = gluePointGas.getColor();
+        // colors.add(new VecF4(c[0], c[1], c[2], c[3]));
+        // }
+        //
+        // gasParticles = new PointCloud(coords, colors);
+        // }
+
         SPHGas[] sphGasses = scene.getSphGas();
         if (sphGasses != null) {
             Model octreeBaseModel = sceneStore.getSPHOctreeBaseModel();

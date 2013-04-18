@@ -256,19 +256,16 @@ public class GlueTimedPlayer implements TimedPlayer {
 
     @Override
     public synchronized void setScreenshotNeeded(boolean value) {
-        if (value) {
-            screenshotFilename = String.format(
-                    "screenshots" + System.getProperty("file.separator")
-                            + "%05d", (frameNumber))
-                    + ".png";
-
-        }
         needsScreenshot = value;
     }
 
     @Override
     public synchronized boolean isScreenshotNeeded() {
         return needsScreenshot;
+    }
+
+    public synchronized void setScreenshotFileName(String screenshotFilename) {
+        this.screenshotFilename = screenshotFilename;
     }
 
     @Override

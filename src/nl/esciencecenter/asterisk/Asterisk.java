@@ -6,6 +6,7 @@ import nl.esciencecenter.asterisk.data.GlueTimedPlayer;
 import nl.esciencecenter.asterisk.input.AsteriskInputHandler;
 import nl.esciencecenter.asterisk.interfaces.TimedPlayer;
 import nl.esciencecenter.esight.ESightNewtWindow;
+import nl.esciencecenter.esight.math.VecF3;
 
 public class Asterisk {
     private final static AsteriskSettings settings = AsteriskSettings
@@ -13,6 +14,7 @@ public class Asterisk {
 
     private static AsteriskInterfaceWindow amusePanel;
     private static AsteriskGLEventListener amuseWindow;
+    private static AsteriskInputHandler amuseInputHandler;
 
     public Asterisk() {
         // Create the Swing interface elements
@@ -22,7 +24,9 @@ public class Asterisk {
         amuseWindow = new AsteriskGLEventListener(
                 AsteriskInputHandler.getInstance());
 
-        new ESightNewtWindow(true, amuseWindow.getInputHandler(), amuseWindow,
+        amuseInputHandler = amuseWindow.getInputHandler();
+
+        new ESightNewtWindow(true, amuseInputHandler, amuseWindow,
                 settings.getDefaultScreenWidth(),
                 settings.getDefaultScreenHeight(),
                 "Asterisk - Amuse Visualization Tool");
@@ -210,6 +214,20 @@ public class Asterisk {
                     null, pGas1);
             lib.addScene(scene);
         }
+
+        try {
+            Thread.sleep(3000);
+            makePNGScreenshot("before.png");
+
+            Thread.sleep(10000);
+            setView(3, 30f, 20f, 0f, -5f);
+            Thread.sleep(3000);
+
+            makePNGScreenshot("after.png");
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     public void addScene(Snapshot scene) {
@@ -221,5 +239,43 @@ public class Asterisk {
 
             new Thread(timer).start();
         }
+
+    }
+
+    public static void setView(int sceneNumber, float xRotation,
+            float yRotation, float zRotation, float cameraDistance) {
+        TimedPlayer timer = AsteriskInterfaceWindow.getTimer();
+        ((GlueTimedPlayer) timer).setFrame(sceneNumber, true);
+
+        amuseInputHandler
+                .setRotation(new VecF3(xRotation, yRotation, zRotation));
+        amuseInputHandler.setViewDist(cameraDistance);
+    }
+
+    public int getSceneNumber() {
+        TimedPlayer timer = AsteriskInterfaceWindow.getTimer();
+        return ((GlueTimedPlayer) timer).getFrameNumber();
+    }
+
+    public float getXRotation() {
+        return amuseInputHandler.getRotation().get(0);
+    }
+
+    public float getYRotation() {
+        return amuseInputHandler.getRotation().get(1);
+    }
+
+    public float getZRotation() {
+        return amuseInputHandler.getRotation().get(2);
+    }
+
+    public float getCameraDistance() {
+        return amuseInputHandler.getViewDist();
+    }
+
+    public static void makePNGScreenshot(String fileName) {
+        TimedPlayer timer = AsteriskInterfaceWindow.getTimer();
+        ((GlueTimedPlayer) timer).setScreenshotFileName(fileName);
+        ((GlueTimedPlayer) timer).setScreenshotNeeded(true);
     }
 }
