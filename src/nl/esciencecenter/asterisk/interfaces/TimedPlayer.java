@@ -43,4 +43,6 @@ public interface TimedPlayer extends Runnable {
 
     public void init();
 
+    public void makeScreenShot(String fileName);
+
 }
