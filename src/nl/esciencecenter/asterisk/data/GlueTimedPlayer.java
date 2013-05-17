@@ -259,6 +259,7 @@ public class GlueTimedPlayer implements TimedPlayer {
     @Override
     public synchronized void setScreenshotNeeded(boolean value) {
         needsScreenshot = value;
+        notifyAll();
     }
 
     @Override
@@ -292,5 +293,21 @@ public class GlueTimedPlayer implements TimedPlayer {
     @Override
     public void delete(GL3 gl) {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public synchronized void makeScreenShot(String screenshotFilename) {
+        this.screenshotFilename = screenshotFilename;
+        this.needsScreenshot = true;
+        
+        while(this.needsScreenshot) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                //IGNORE
+            }
+        }
+        
+        
     }
 }
