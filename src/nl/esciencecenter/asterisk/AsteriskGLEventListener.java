@@ -62,8 +62,8 @@ import org.slf4j.LoggerFactory;
 public class AsteriskGLEventListener implements GLEventListener {
     private final static Logger logger = LoggerFactory.getLogger(AsteriskGLEventListener.class);
 
-    private ShaderProgram animatedTurbulenceShader, pplShader, starHaloShader, axesShader, pointGasShader,
-            octreeGasShader, postprocessShader, gaussianBlurShader, textShader;
+    private ShaderProgram animatedTurbulenceShader, pplShader, starHaloShader, axesShader, pointGasShader, octreeGasShader,
+            postprocessShader, gaussianBlurShader, textShader;
 
     private FBO starHaloFBO, pointGasFBO, octreeGasFBO, sphereFBO, starFBO, axesFBO, hudFBO;
 
@@ -100,10 +100,10 @@ public class AsteriskGLEventListener implements GLEventListener {
     protected final float ftheta = 0.0f;
     protected final float phi = 0.0f;
 
-    protected final float fovy = 45.0f;
+    protected final float fovy;
     private float aspect;
-    protected final float zNear = 0.1f;
-    protected final float zFar = 3000.0f;
+    protected final float zNear;
+    protected final float zFar;
 
     private final boolean test = false;
 
@@ -111,6 +111,13 @@ public class AsteriskGLEventListener implements GLEventListener {
         this.loader = new ShaderProgramLoader();
         this.inputHandler = inputHandler;
         this.font = FontFactory.get(fontSet).getDefault();
+
+        AsteriskSettings settings = AsteriskSettings.getInstance();
+
+        this.fovy = settings.getFieldOfView();
+        this.zNear = settings.getZNear();
+        this.zFar = settings.getZFar();
+
     }
 
     public static void contextOn(GLAutoDrawable drawable) {
@@ -185,8 +192,9 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-        final Point4 eye = new Point4((float) (radius * Math.sin(ftheta) * Math.cos(phi)), (float) (radius
-                * Math.sin(ftheta) * Math.sin(phi)), (float) (radius * Math.cos(ftheta)), 1.0f);
+        final Point4 eye =
+                new Point4((float) (radius * Math.sin(ftheta) * Math.cos(phi)),
+                        (float) (radius * Math.sin(ftheta) * Math.sin(phi)), (float) (radius * Math.cos(ftheta)), 1.0f);
         final Point4 at = new Point4(0.0f, 0.0f, 0.0f, 1.0f);
         final VecF4 up = new VecF4(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -307,8 +315,8 @@ public class AsteriskGLEventListener implements GLEventListener {
         gl.glEnable(GL.GL_DEPTH_TEST);
 
         octreeGasFBO.unBind(gl);
-        blur(gl, octreeGasFBO, FSQ_blur, settings.getOctreeGasBlurPassSetting(),
-                settings.getOctreeGasBlurTypeSetting(), settings.getOctreeGasBlurSizeSetting());
+        blur(gl, octreeGasFBO, FSQ_blur, settings.getOctreeGasBlurPassSetting(), settings.getOctreeGasBlurTypeSetting(),
+                settings.getOctreeGasBlurSizeSetting());
     }
 
     private void renderSpheres(GL3 gl, MatF4 mv, VisualScene newScene) throws UninitializedException {
@@ -334,8 +342,7 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         final MatF4 p = MatrixFMath.perspective(fovy, aspect, zNear, zFar);
         animatedTurbulenceShader.setUniformMatrix("PMatrix", p);
-        animatedTurbulenceShader.setUniformMatrix("SMatrix",
-                MatrixFMath.scale(settings.getParticleSizeMultiplier() * .1f));
+        animatedTurbulenceShader.setUniformMatrix("SMatrix", MatrixFMath.scale(settings.getParticleSizeMultiplier() * .1f));
         // animatedTurbulenceShader.setUniformMatrix("MVMatrix", mv);
         animatedTurbulenceShader.setUniform("Offset", offset);
 
@@ -611,23 +618,26 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         // Load and compile shaders, then use program.
         try {
-            animatedTurbulenceShader = loader.createProgram(gl, "animatedTurbulence", new File(
-                    "shaders/vs_sunsurface.vp"), new File("shaders/fs_animatedTurbulence.fp"));
+            animatedTurbulenceShader =
+                    loader.createProgram(gl, "animatedTurbulence", new File("shaders/vs_sunsurface.vp"), new File(
+                            "shaders/fs_animatedTurbulence.fp"));
             pplShader = loader.createProgram(gl, "ppl", new File("shaders/vs_ppl.vp"), new File("shaders/fs_ppl.fp"));
-            starHaloShader = loader.createProgram(gl, "starHalo", new File("shaders/vs_starHalo.vp"), new File(
-                    "shaders/fs_starHalo.fp"));
-            axesShader = loader.createProgram(gl, "axes", new File("shaders/vs_axes.vp"),
-                    new File("shaders/fs_axes.fp"));
-            pointGasShader = loader.createProgram(gl, "gas", new File("shaders/vs_gas.vp"), new File(
-                    "shaders/fs_gas.fp"));
-            octreeGasShader = loader.createProgram(gl, "octreeGas", new File("shaders/vs_octreeGas.vp"), new File(
-                    "shaders/fs_octreeGas.fp"));
-            textShader = loader.createProgram(gl, "text", new File("shaders/vs_multiColorTextShader.vp"), new File(
-                    "shaders/fs_multiColorTextShader.fp"));
-            postprocessShader = loader.createProgram(gl, "postprocess", new File("shaders/vs_postprocess.vp"),
-                    new File("shaders/fs_postprocess.fp"));
-            gaussianBlurShader = loader.createProgram(gl, "gaussianBlur", new File("shaders/vs_postprocess.vp"),
-                    new File("shaders/fs_gaussian_blur.fp"));
+            starHaloShader =
+                    loader.createProgram(gl, "starHalo", new File("shaders/vs_starHalo.vp"), new File("shaders/fs_starHalo.fp"));
+            axesShader = loader.createProgram(gl, "axes", new File("shaders/vs_axes.vp"), new File("shaders/fs_axes.fp"));
+            pointGasShader = loader.createProgram(gl, "gas", new File("shaders/vs_gas.vp"), new File("shaders/fs_gas.fp"));
+            octreeGasShader =
+                    loader.createProgram(gl, "octreeGas", new File("shaders/vs_octreeGas.vp"),
+                            new File("shaders/fs_octreeGas.fp"));
+            textShader =
+                    loader.createProgram(gl, "text", new File("shaders/vs_multiColorTextShader.vp"), new File(
+                            "shaders/fs_multiColorTextShader.fp"));
+            postprocessShader =
+                    loader.createProgram(gl, "postprocess", new File("shaders/vs_postprocess.vp"), new File(
+                            "shaders/fs_postprocess.fp"));
+            gaussianBlurShader =
+                    loader.createProgram(gl, "gaussianBlur", new File("shaders/vs_postprocess.vp"), new File(
+                            "shaders/fs_gaussian_blur.fp"));
         } catch (final Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -700,9 +710,8 @@ public class AsteriskGLEventListener implements GLEventListener {
                     long stopTime = System.currentTimeMillis();
                     long timePassed = stopTime - startTime;
 
-                    System.out.println("Point cloud generation progress: "
-                            + (int) (((float) i / (float) pGas1.length) * 100) + "% ... Time passed: "
-                            + TimeUnit.MILLISECONDS.toSeconds(timePassed) + " seconds.");
+                    System.out.println("Point cloud generation progress: " + (int) (((float) i / (float) pGas1.length) * 100)
+                            + "% ... Time passed: " + TimeUnit.MILLISECONDS.toSeconds(timePassed) + " seconds.");
 
                 }
             }

@@ -301,8 +301,41 @@ public class Asterisk {
     }
 
     public void makePNGScreenshot(String fileName) {
+//        TimedPlayer timer = AsteriskInterfaceWindow.getTimer();
+//        ((GlueTimedPlayer) timer).setScreenshotFileName(fileName);
+//        ((GlueTimedPlayer) timer).setScreenshotNeeded(true);
+        
         TimedPlayer timer = AsteriskInterfaceWindow.getTimer();
-        ((GlueTimedPlayer) timer).setScreenshotFileName(fileName);
-        ((GlueTimedPlayer) timer).setScreenshotNeeded(true);
+        timer.makeScreenShot(fileName);
+    }
+    
+    public int getSceneNumber() {
+        TimedPlayer timer = AsteriskInterfaceWindow.getTimer();
+        return ((GlueTimedPlayer) timer).getFrameNumber();
+    }
+
+    public VecF3 getRotation() {
+        return amuseInputHandler.getRotation();
+    }
+
+    public VecF3 getTranslation() {
+        return amuseInputHandler.getTranslation();
+    }
+  
+    public void setSceneNumber(int sceneNumber) {
+        TimedPlayer timer = AsteriskInterfaceWindow.getTimer();
+        ((GlueTimedPlayer) timer).setFrame(sceneNumber, true);
+    }
+
+    public void setRotation(VecF3 rotation) {
+        amuseInputHandler.setRotation(rotation);
+    }
+
+    public void setTranslation(VecF3 translation) {
+        amuseInputHandler.setTranslation(translation);
+    }
+
+    public void setCameraDistance(float cameraDistance) {
+        amuseInputHandler.setViewDist(cameraDistance);
     }
 }
