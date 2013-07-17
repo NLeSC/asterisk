@@ -19,10 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SPHOctreeNode {
-    private final static AsteriskSettings settings = AsteriskSettings
-            .getInstance();
-    private final static Logger logger = LoggerFactory
-            .getLogger(SPHOctreeNode.class);
+    private final static AsteriskSettings settings = AsteriskSettings.getInstance();
+    private final static Logger logger = LoggerFactory.getLogger(SPHOctreeNode.class);
 
     public static enum Octant {
         PPP, PPN, PNP, PNN, NPP, NPN, NNP, NNN
@@ -62,8 +60,7 @@ public class SPHOctreeNode {
 
     private final GlueSceneDescription description;
 
-    public SPHOctreeNode(Model baseModel, int depth, VecF3 center, float size,
-            GlueSceneDescription description) {
+    public SPHOctreeNode(Model baseModel, int depth, VecF3 center, float size, GlueSceneDescription description) {
         this.baseModel = baseModel;
         this.depth = depth;
         this.center = center;
@@ -84,18 +81,14 @@ public class SPHOctreeNode {
     public void addElement(SPHOctreeElement element) {
         final VecF3 location = element.getCenter();
 
-        if ((location.get(0) > (center.get(0) - cubeSize))
-                && (location.get(1) > (center.get(1) - cubeSize))
-                && (location.get(2) > (center.get(2) - cubeSize))
-                && (location.get(0) < (center.get(0) + cubeSize))
-                && (location.get(1) < (center.get(1) + cubeSize))
-                && (location.get(2) < (center.get(2) + cubeSize))) {
+        if ((location.get(0) > (center.get(0) - cubeSize)) && (location.get(1) > (center.get(1) - cubeSize))
+                && (location.get(2) > (center.get(2) - cubeSize)) && (location.get(0) < (center.get(0) + cubeSize))
+                && (location.get(1) < (center.get(1) + cubeSize)) && (location.get(2) < (center.get(2) + cubeSize))) {
 
             if (subdivided) {
                 addElementSubdivided(element);
             } else {
-                if (childCounter > AsteriskSettings
-                        .getMaxOctreeElementsPerNode()) {
+                if (childCounter > AsteriskSettings.getMaxOctreeElementsPerNode()) {
                     if (depth < settings.getMaxOctreeDepth()) {
                         subDiv();
                         childCounter = 0;
@@ -147,39 +140,23 @@ public class SPHOctreeNode {
     protected void subDiv() {
         float childSize = cubeSize / 2f;
 
-        VecF3 pppCenter = center
-                .add(new VecF3(childSize, childSize, childSize));
-        VecF3 ppnCenter = center
-                .add(new VecF3(childSize, childSize, -childSize));
-        VecF3 pnpCenter = center
-                .add(new VecF3(childSize, -childSize, childSize));
-        VecF3 nppCenter = center
-                .add(new VecF3(-childSize, childSize, childSize));
-        VecF3 pnnCenter = center.add(new VecF3(childSize, -childSize,
-                -childSize));
-        VecF3 npnCenter = center.add(new VecF3(-childSize, childSize,
-                -childSize));
-        VecF3 nnpCenter = center.add(new VecF3(-childSize, -childSize,
-                childSize));
-        VecF3 nnnCenter = center.add(new VecF3(-childSize, -childSize,
-                -childSize));
+        VecF3 pppCenter = center.add(new VecF3(childSize, childSize, childSize));
+        VecF3 ppnCenter = center.add(new VecF3(childSize, childSize, -childSize));
+        VecF3 pnpCenter = center.add(new VecF3(childSize, -childSize, childSize));
+        VecF3 nppCenter = center.add(new VecF3(-childSize, childSize, childSize));
+        VecF3 pnnCenter = center.add(new VecF3(childSize, -childSize, -childSize));
+        VecF3 npnCenter = center.add(new VecF3(-childSize, childSize, -childSize));
+        VecF3 nnpCenter = center.add(new VecF3(-childSize, -childSize, childSize));
+        VecF3 nnnCenter = center.add(new VecF3(-childSize, -childSize, -childSize));
 
-        ppp = new SPHOctreeNode(baseModel, depth + 1, pppCenter, childSize,
-                description);
-        ppn = new SPHOctreeNode(baseModel, depth + 1, ppnCenter, childSize,
-                description);
-        pnp = new SPHOctreeNode(baseModel, depth + 1, pnpCenter, childSize,
-                description);
-        npp = new SPHOctreeNode(baseModel, depth + 1, nppCenter, childSize,
-                description);
-        pnn = new SPHOctreeNode(baseModel, depth + 1, pnnCenter, childSize,
-                description);
-        npn = new SPHOctreeNode(baseModel, depth + 1, npnCenter, childSize,
-                description);
-        nnp = new SPHOctreeNode(baseModel, depth + 1, nnpCenter, childSize,
-                description);
-        nnn = new SPHOctreeNode(baseModel, depth + 1, nnnCenter, childSize,
-                description);
+        ppp = new SPHOctreeNode(baseModel, depth + 1, pppCenter, childSize, description);
+        ppn = new SPHOctreeNode(baseModel, depth + 1, ppnCenter, childSize, description);
+        pnp = new SPHOctreeNode(baseModel, depth + 1, pnpCenter, childSize, description);
+        npp = new SPHOctreeNode(baseModel, depth + 1, nppCenter, childSize, description);
+        pnn = new SPHOctreeNode(baseModel, depth + 1, pnnCenter, childSize, description);
+        npn = new SPHOctreeNode(baseModel, depth + 1, npnCenter, childSize, description);
+        nnp = new SPHOctreeNode(baseModel, depth + 1, nnpCenter, childSize, description);
+        nnn = new SPHOctreeNode(baseModel, depth + 1, nnnCenter, childSize, description);
 
         for (SPHOctreeElement element : elements) {
             addElementSubdivided(element);
@@ -201,8 +178,7 @@ public class SPHOctreeNode {
                 program.setUniformVector("Color", color);
                 program.setUniformMatrix("node_MVmatrix", TMatrix);
 
-                program.setUniformMatrix("node_NormalMatrix",
-                        MatrixFMath.getNormalMatrix(TMatrix));
+                program.setUniformMatrix("node_NormalMatrix", MatrixFMath.getNormalMatrix(TMatrix));
 
                 try {
                     program.use(gl);
@@ -210,7 +186,11 @@ public class SPHOctreeNode {
                     e.printStackTrace();
                 }
 
-                baseModel.draw(gl, program);
+                try {
+                    baseModel.draw(gl, program);
+                } catch (UninitializedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -347,11 +327,9 @@ public class SPHOctreeNode {
                     }
                     color = tmpColor.div(elements.size());
 
-                    float alpha = (elements.size() / AsteriskSettings
-                            .getMaxOctreeElementsPerNode())
+                    float alpha = (elements.size() / AsteriskSettings.getMaxOctreeElementsPerNode())
                             * (depth * depth * depth)
-                            / (float) (AsteriskSettings.MAX_OCTREE_DEPTH
-                                    * AsteriskSettings.MAX_OCTREE_DEPTH * AsteriskSettings.MAX_OCTREE_DEPTH);
+                            / (float) (AsteriskSettings.MAX_OCTREE_DEPTH * AsteriskSettings.MAX_OCTREE_DEPTH * AsteriskSettings.MAX_OCTREE_DEPTH);
                     color.set(3, alpha * alpha);
 
                     // System.err.println(color);

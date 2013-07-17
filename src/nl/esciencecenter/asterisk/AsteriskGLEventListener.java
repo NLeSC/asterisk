@@ -113,21 +113,35 @@ public class AsteriskGLEventListener implements GLEventListener {
         this.font = FontFactory.get(fontSet).getDefault();
     }
 
+    public static void contextOn(GLAutoDrawable drawable) {
+        try {
+            final int status = drawable.getContext().makeCurrent();
+            if ((status != GLContext.CONTEXT_CURRENT) && (status != GLContext.CONTEXT_CURRENT_NEW)) {
+                System.err.println("Error swapping context to onscreen.");
+            }
+        } catch (final GLException e) {
+            System.err.println("Exception while swapping context to onscreen.");
+            e.printStackTrace();
+        }
+    }
+
+    public static void contextOff(GLAutoDrawable drawable) {
+        // Release the context.
+        try {
+            drawable.getContext().release();
+        } catch (final GLException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void display(GLAutoDrawable drawable) {
         TimedPlayer timer = AsteriskInterfaceWindow.getTimer();
 
         if (timer.isInitialized()) {
             this.timer = timer;
-            try {
-                final int status = drawable.getContext().makeCurrent();
-                if ((status != GLContext.CONTEXT_CURRENT) && (status != GLContext.CONTEXT_CURRENT_NEW)) {
-                    System.err.println("Error swapping context to onscreen.");
-                }
-            } catch (final GLException e) {
-                System.err.println("Exception while swapping context to onscreen.");
-                e.printStackTrace();
-            }
+
+            contextOn(drawable);
 
             final GL3 gl = drawable.getContext().getGL().getGL3();
             gl.glViewport(0, 0, canvasWidth, canvasHeight);
@@ -162,11 +176,7 @@ public class AsteriskGLEventListener implements GLEventListener {
                 timer.setScreenshotNeeded(false);
             }
 
-            try {
-                drawable.getContext().release();
-            } catch (final GLException e) {
-                e.printStackTrace();
-            }
+            contextOff(drawable);
         }
     }
 
@@ -457,15 +467,7 @@ public class AsteriskGLEventListener implements GLEventListener {
 
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int w, int h) {
-        try {
-            final int status = drawable.getContext().makeCurrent();
-            if ((status != GLContext.CONTEXT_CURRENT) && (status != GLContext.CONTEXT_CURRENT_NEW)) {
-                System.err.println("Error swapping context to onscreen.");
-            }
-        } catch (final GLException e) {
-            System.err.println("Exception while swapping context to onscreen.");
-            e.printStackTrace();
-        }
+        contextOn(drawable);
 
         final GL3 gl = GLContext.getCurrentGL().getGL3();
 
@@ -501,6 +503,8 @@ public class AsteriskGLEventListener implements GLEventListener {
         finalPBO.delete(gl);
         finalPBO = new IntPBO(canvasWidth, canvasHeight);
         finalPBO.init(gl);
+
+        contextOff(drawable);
     }
 
     private void blur(GL3 gl, FBO target, Quad fullScreenQuad, int passes, int blurType, float blurSize) {
@@ -541,6 +545,8 @@ public class AsteriskGLEventListener implements GLEventListener {
 
     @Override
     public void dispose(GLAutoDrawable drawable) {
+        contextOn(drawable);
+
         final GL3 gl = drawable.getGL().getGL3();
 
         noiseTex.delete(gl);
@@ -554,20 +560,18 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         finalPBO.delete(gl);
 
-        loader.cleanup(gl);
+        try {
+            loader.cleanup(gl);
+        } catch (UninitializedException e) {
+            e.printStackTrace();
+        }
+
+        contextOff(drawable);
     }
 
     @Override
     public void init(GLAutoDrawable drawable) {
-        try {
-            final int status = drawable.getContext().makeCurrent();
-            if ((status != GLContext.CONTEXT_CURRENT) && (status != GLContext.CONTEXT_CURRENT_NEW)) {
-                System.err.println("Error swapping context to onscreen.");
-            }
-        } catch (final GLException e) {
-            System.err.println("Exception while swapping context to onscreen.");
-            e.printStackTrace();
-        }
+        contextOn(drawable);
 
         final GL3 gl = GLContext.getCurrentGL().getGL3();
 
@@ -714,6 +718,8 @@ public class AsteriskGLEventListener implements GLEventListener {
                 new Thread(timer).start();
             }
         }
+
+        contextOff(drawable);
     }
 
     private static float randBound(float lower, float delta) {

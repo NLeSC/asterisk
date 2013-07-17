@@ -27,11 +27,10 @@ public class GlueSceneStorage implements SceneStorage {
     public GlueSceneStorage(GlueDatasetManager manager) {
         sceneStorage = new HashMap<GlueSceneDescription, GlueScene>();
 
-        this.starBaseModel = new Sphere(AsteriskSettings.STAR_SUBDIVISION);
-        this.planetBaseModel = new Sphere(AsteriskSettings.PLANET_SUBDIVISION);
-        this.sphereBaseModel = new Sphere(AsteriskSettings.SPHERE_SUBDIVISION);
-        this.sphOctreeBaseModel = new Sphere(
-                AsteriskSettings.OCTREE_MODEL_SUBDIVISION);
+        this.starBaseModel = new Sphere(AsteriskSettings.STAR_SUBDIVISION, true);
+        this.planetBaseModel = new Sphere(AsteriskSettings.PLANET_SUBDIVISION, false);
+        this.sphereBaseModel = new Sphere(AsteriskSettings.SPHERE_SUBDIVISION, false);
+        this.sphOctreeBaseModel = new Sphere(AsteriskSettings.OCTREE_MODEL_SUBDIVISION, false);
 
         this.manager = manager;
     }
@@ -64,8 +63,7 @@ public class GlueSceneStorage implements SceneStorage {
     }
 
     @Override
-    public synchronized void requestNewConfiguration(
-            GlueSceneDescription newDescription) {
+    public synchronized void requestNewConfiguration(GlueSceneDescription newDescription) {
         // System.out.println("New config request");
         HashMap<GlueSceneDescription, GlueScene> newSceneStore = new HashMap<GlueSceneDescription, GlueScene>();
 
