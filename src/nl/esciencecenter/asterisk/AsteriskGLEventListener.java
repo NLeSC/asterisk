@@ -62,10 +62,10 @@ import org.slf4j.LoggerFactory;
 public class AsteriskGLEventListener implements GLEventListener {
     private final static Logger logger = LoggerFactory.getLogger(AsteriskGLEventListener.class);
 
-    private ShaderProgram animatedTurbulenceShader, pplShader, starHaloShader, axesShader, pointGasShader, octreeGasShader,
+    private ShaderProgram animatedTurbulenceShader, pplShader, starHaloShader, axesShader, pointGasShader,
             postprocessShader, gaussianBlurShader, textShader;
 
-    private FBO starHaloFBO, pointGasFBO, octreeGasFBO, sphereFBO, starFBO, axesFBO, hudFBO;
+    private FBO starHaloFBO, pointGasFBO, sphereFBO, starFBO, axesFBO, hudFBO;
 
     private Quad FSQ_postprocess, FSQ_blur;
     private Model xAxis, yAxis, zAxis;
@@ -192,9 +192,8 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
-        final Point4 eye =
-                new Point4((float) (radius * Math.sin(ftheta) * Math.cos(phi)),
-                        (float) (radius * Math.sin(ftheta) * Math.sin(phi)), (float) (radius * Math.cos(ftheta)), 1.0f);
+        final Point4 eye = new Point4((float) (radius * Math.sin(ftheta) * Math.cos(phi)), (float) (radius
+                * Math.sin(ftheta) * Math.sin(phi)), (float) (radius * Math.cos(ftheta)), 1.0f);
         final Point4 at = new Point4(0.0f, 0.0f, 0.0f, 1.0f);
         final VecF4 up = new VecF4(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -272,7 +271,6 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         try {
             renderPointGas(gl, mv.clone(), newScene);
-            renderOctreeGas(gl, mv.clone(), newScene);
             renderSpheres(gl, mv, newScene);
             renderStars(gl, mv.clone(), newScene);
             renderStarHalos(gl, mv.clone(), newScene);
@@ -290,6 +288,9 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         final MatF4 p = MatrixFMath.perspective(fovy, aspect, zNear, zFar);
         pointGasShader.setUniformMatrix("PMatrix", p);
+        pointGasShader.setUniform("PointSizeCameraDistDependant",
+                settings.isPointgasSizeDependantOnCameraDistance() ? 1 : 0);
+        pointGasShader.setUniform("PointSizeMultiplier", (settings.getPointGasPointSizeSetting() / 5f));
 
         newScene.drawGasPointCloud(gl, pointGasShader, mv);
 
@@ -299,24 +300,6 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         blur(gl, pointGasFBO, FSQ_blur, settings.getPointGasBlurPassSetting(), settings.getPointGasBlurTypeSetting(),
                 settings.getPointGasBlurSizeSetting());
-    }
-
-    private void renderOctreeGas(GL3 gl, MatF4 mv, VisualScene newScene) throws UninitializedException {
-        octreeGasFBO.bind(gl);
-        gl.glClear(GL.GL_DEPTH_BUFFER_BIT | GL.GL_COLOR_BUFFER_BIT);
-
-        gl.glDisable(GL.GL_DEPTH_TEST);
-
-        final MatF4 p = MatrixFMath.perspective(fovy, aspect, zNear, zFar);
-        octreeGasShader.setUniformMatrix("PMatrix", p);
-
-        newScene.drawGasOctree(gl, octreeGasShader, mv);
-
-        gl.glEnable(GL.GL_DEPTH_TEST);
-
-        octreeGasFBO.unBind(gl);
-        blur(gl, octreeGasFBO, FSQ_blur, settings.getOctreeGasBlurPassSetting(), settings.getOctreeGasBlurTypeSetting(),
-                settings.getOctreeGasBlurSizeSetting());
     }
 
     private void renderSpheres(GL3 gl, MatF4 mv, VisualScene newScene) throws UninitializedException {
@@ -342,7 +325,8 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         final MatF4 p = MatrixFMath.perspective(fovy, aspect, zNear, zFar);
         animatedTurbulenceShader.setUniformMatrix("PMatrix", p);
-        animatedTurbulenceShader.setUniformMatrix("SMatrix", MatrixFMath.scale(settings.getParticleSizeMultiplier() * .1f));
+        animatedTurbulenceShader.setUniformMatrix("SMatrix",
+                MatrixFMath.scale(settings.getParticleSizeMultiplier() * .1f));
         // animatedTurbulenceShader.setUniformMatrix("MVMatrix", mv);
         animatedTurbulenceShader.setUniform("Offset", offset);
 
@@ -442,7 +426,6 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         postprocessShader.setUniform("axesTexture", axesFBO.getTexture().getMultitexNumber());
         postprocessShader.setUniform("pointGasTexture", pointGasFBO.getTexture().getMultitexNumber());
-        postprocessShader.setUniform("octreeGasTexture", octreeGasFBO.getTexture().getMultitexNumber());
         postprocessShader.setUniform("sphereTexture", sphereFBO.getTexture().getMultitexNumber());
         postprocessShader.setUniform("starTexture", starFBO.getTexture().getMultitexNumber());
         postprocessShader.setUniform("starHaloTexture", starHaloFBO.getTexture().getMultitexNumber());
@@ -452,7 +435,6 @@ public class AsteriskGLEventListener implements GLEventListener {
         postprocessShader.setUniform("starBrightness", settings.getPostprocessingStarBrightness());
         postprocessShader.setUniform("starHaloBrightness", settings.getPostprocessingStarHaloBrightness());
         postprocessShader.setUniform("pointGasBrightness", settings.getPostprocessingPointGasBrightness());
-        postprocessShader.setUniform("octreeGasBrightness", settings.getPostprocessingOctreeGasBrightness());
         postprocessShader.setUniform("axesBrightness", settings.getPostprocessingAxesBrightness());
         postprocessShader.setUniform("hudBrightness", settings.getPostprocessingHudBrightness());
         postprocessShader.setUniform("overallBrightness", settings.getPostprocessingOverallBrightness());
@@ -486,7 +468,6 @@ public class AsteriskGLEventListener implements GLEventListener {
         starFBO.delete(gl);
         starHaloFBO.delete(gl);
         pointGasFBO.delete(gl);
-        octreeGasFBO.delete(gl);
         axesFBO.delete(gl);
         hudFBO.delete(gl);
         sphereFBO.delete(gl);
@@ -494,15 +475,13 @@ public class AsteriskGLEventListener implements GLEventListener {
         starFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE1);
         starHaloFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE2);
         pointGasFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE3);
-        octreeGasFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE4);
-        axesFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE5);
-        hudFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE6);
-        sphereFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE7);
+        axesFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE4);
+        hudFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE5);
+        sphereFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE6);
 
         starFBO.init(gl);
         starHaloFBO.init(gl);
         pointGasFBO.init(gl);
-        octreeGasFBO.init(gl);
         axesFBO.init(gl);
         hudFBO.init(gl);
         sphereFBO.init(gl);
@@ -526,6 +505,7 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         gaussianBlurShader.setUniform("scrHeight", target.getTexture().getHeight());
         gaussianBlurShader.setUniform("Alpha", 1f);
+        gaussianBlurShader.setUniform("ColorMultiplier", 1.25f);
 
         gaussianBlurShader.setUniform("blurDirection", 0);
 
@@ -560,7 +540,6 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         starFBO.delete(gl);
         starHaloFBO.delete(gl);
-        octreeGasFBO.delete(gl);
         axesFBO.delete(gl);
         hudFBO.delete(gl);
         sphereFBO.delete(gl);
@@ -618,26 +597,21 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         // Load and compile shaders, then use program.
         try {
-            animatedTurbulenceShader =
-                    loader.createProgram(gl, "animatedTurbulence", new File("shaders/vs_sunsurface.vp"), new File(
-                            "shaders/fs_animatedTurbulence.fp"));
+            animatedTurbulenceShader = loader.createProgram(gl, "animatedTurbulence", new File(
+                    "shaders/vs_sunsurface.vp"), new File("shaders/fs_animatedTurbulence.fp"));
             pplShader = loader.createProgram(gl, "ppl", new File("shaders/vs_ppl.vp"), new File("shaders/fs_ppl.fp"));
-            starHaloShader =
-                    loader.createProgram(gl, "starHalo", new File("shaders/vs_starHalo.vp"), new File("shaders/fs_starHalo.fp"));
-            axesShader = loader.createProgram(gl, "axes", new File("shaders/vs_axes.vp"), new File("shaders/fs_axes.fp"));
-            pointGasShader = loader.createProgram(gl, "gas", new File("shaders/vs_gas.vp"), new File("shaders/fs_gas.fp"));
-            octreeGasShader =
-                    loader.createProgram(gl, "octreeGas", new File("shaders/vs_octreeGas.vp"),
-                            new File("shaders/fs_octreeGas.fp"));
-            textShader =
-                    loader.createProgram(gl, "text", new File("shaders/vs_multiColorTextShader.vp"), new File(
-                            "shaders/fs_multiColorTextShader.fp"));
-            postprocessShader =
-                    loader.createProgram(gl, "postprocess", new File("shaders/vs_postprocess.vp"), new File(
-                            "shaders/fs_postprocess.fp"));
-            gaussianBlurShader =
-                    loader.createProgram(gl, "gaussianBlur", new File("shaders/vs_postprocess.vp"), new File(
-                            "shaders/fs_gaussian_blur.fp"));
+            starHaloShader = loader.createProgram(gl, "starHalo", new File("shaders/vs_starHalo.vp"), new File(
+                    "shaders/fs_starHalo.fp"));
+            axesShader = loader.createProgram(gl, "axes", new File("shaders/vs_axes.vp"),
+                    new File("shaders/fs_axes.fp"));
+            pointGasShader = loader.createProgram(gl, "gas", new File("shaders/vs_gas.vp"), new File(
+                    "shaders/fs_gas.fp"));
+            textShader = loader.createProgram(gl, "text", new File("shaders/vs_multiColorTextShader.vp"), new File(
+                    "shaders/fs_multiColorTextShader.fp"));
+            postprocessShader = loader.createProgram(gl, "postprocess", new File("shaders/vs_postprocess.vp"),
+                    new File("shaders/fs_postprocess.fp"));
+            gaussianBlurShader = loader.createProgram(gl, "gaussianBlur", new File("shaders/vs_postprocess.vp"),
+                    new File("shaders/fs_gaussian_blur.fp"));
         } catch (final Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -674,15 +648,13 @@ public class AsteriskGLEventListener implements GLEventListener {
         starFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE1);
         starHaloFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE2);
         pointGasFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE3);
-        octreeGasFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE4);
-        axesFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE5);
-        hudFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE6);
-        sphereFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE7);
+        axesFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE4);
+        hudFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE5);
+        sphereFBO = new FBO(canvasWidth, canvasHeight, GL.GL_TEXTURE6);
 
         starFBO.init(gl);
         starHaloFBO.init(gl);
         pointGasFBO.init(gl);
-        octreeGasFBO.init(gl);
         axesFBO.init(gl);
         hudFBO.init(gl);
         sphereFBO.init(gl);
@@ -710,8 +682,9 @@ public class AsteriskGLEventListener implements GLEventListener {
                     long stopTime = System.currentTimeMillis();
                     long timePassed = stopTime - startTime;
 
-                    System.out.println("Point cloud generation progress: " + (int) (((float) i / (float) pGas1.length) * 100)
-                            + "% ... Time passed: " + TimeUnit.MILLISECONDS.toSeconds(timePassed) + " seconds.");
+                    System.out.println("Point cloud generation progress: "
+                            + (int) (((float) i / (float) pGas1.length) * 100) + "% ... Time passed: "
+                            + TimeUnit.MILLISECONDS.toSeconds(timePassed) + " seconds.");
 
                 }
             }

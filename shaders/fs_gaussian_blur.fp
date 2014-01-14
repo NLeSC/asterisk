@@ -12,8 +12,9 @@ uniform int blurType;
 uniform float Sigma;
 uniform float NumPixelsPerSide;
 uniform float Alpha;
+uniform float ColorMultiplier;
 
-const float pi = 3.14159265;
+const float pi = 3.14159265359;
 
 const vec2 vertical = vec2(0.0, 1.0);
 const vec2 horizontal = vec2(1.0, 0.0);
@@ -100,10 +101,10 @@ void main() {
 	vec2 direction;
 	if (blurDirection == 0) {
 		direction = horizontal;
-		fragColor = vec4(gaussianBlur(Texture, tCoord, direction, scrWidth, blurSize, numPixelsPerSide, sigma).rgb, Alpha);
+		fragColor = vec4(gaussianBlur(Texture, tCoord, direction, scrWidth, blurSize, numPixelsPerSide, sigma).rgb*ColorMultiplier, Alpha);
 	} else {
 		direction = vertical;
-		fragColor = vec4(gaussianBlur(Texture, tCoord, direction, scrHeight, blurSize, numPixelsPerSide, sigma).rgb, Alpha);
+		fragColor = vec4(gaussianBlur(Texture, tCoord, direction, scrHeight, blurSize, numPixelsPerSide, sigma).rgb*ColorMultiplier, Alpha);
 	}
 	
   	

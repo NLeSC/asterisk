@@ -20,7 +20,6 @@ public class GlueSceneStorage implements SceneStorage {
     private final Sphere starBaseModel;
     private final Sphere planetBaseModel;
     private final Sphere sphereBaseModel;
-    private final Sphere sphOctreeBaseModel;
 
     private boolean initialized = false;
 
@@ -30,7 +29,6 @@ public class GlueSceneStorage implements SceneStorage {
         this.starBaseModel = new Sphere(AsteriskSettings.STAR_SUBDIVISION, true);
         this.planetBaseModel = new Sphere(AsteriskSettings.PLANET_SUBDIVISION, false);
         this.sphereBaseModel = new Sphere(AsteriskSettings.SPHERE_SUBDIVISION, false);
-        this.sphOctreeBaseModel = new Sphere(AsteriskSettings.OCTREE_MODEL_SUBDIVISION, false);
 
         this.manager = manager;
     }
@@ -41,7 +39,6 @@ public class GlueSceneStorage implements SceneStorage {
             starBaseModel.init(gl);
             planetBaseModel.init(gl);
             sphereBaseModel.init(gl);
-            sphOctreeBaseModel.init(gl);
 
             initialized = true;
         }
@@ -105,9 +102,5 @@ public class GlueSceneStorage implements SceneStorage {
 
     public Model getSphereBaseModel() {
         return sphereBaseModel;
-    }
-
-    public Model getSPHOctreeBaseModel() {
-        return sphOctreeBaseModel;
     }
 }
