@@ -290,7 +290,7 @@ public class AsteriskGLEventListener implements GLEventListener {
         pointGasShader.setUniformMatrix("PMatrix", p);
         pointGasShader.setUniform("PointSizeCameraDistDependant",
                 settings.isPointgasSizeDependantOnCameraDistance() ? 1 : 0);
-        pointGasShader.setUniform("PointSizeMultiplier", (settings.getPointGasPointSizeSetting() / 5f));
+        pointGasShader.setUniform("PointSizeMultiplier", (settings.getPointGasPointSizeSetting()));
 
         newScene.drawGasPointCloud(gl, pointGasShader, mv);
 
@@ -501,13 +501,14 @@ public class AsteriskGLEventListener implements GLEventListener {
 
         gaussianBlurShader.setUniform("blurType", blurType);
         gaussianBlurShader.setUniform("blurSize", blurSize);
-        gaussianBlurShader.setUniform("scrWidth", target.getTexture().getWidth());
 
+        gaussianBlurShader.setUniform("scrWidth", target.getTexture().getWidth());
         gaussianBlurShader.setUniform("scrHeight", target.getTexture().getHeight());
+
         gaussianBlurShader.setUniform("Alpha", 1f);
         gaussianBlurShader.setUniform("ColorMultiplier", 1.25f);
 
-        gaussianBlurShader.setUniform("blurDirection", 0);
+        // gaussianBlurShader.setUniform("blurDirection", 0);
 
         gaussianBlurShader.setUniform("NumPixelsPerSide", 2f);
         gaussianBlurShader.setUniform("Sigma", 2f);
