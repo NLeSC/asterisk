@@ -18,10 +18,6 @@ public class AsteriskSettings extends Settings {
 
     private final String[] ACCEPTABLE_EXTENSIONS = new String[] { "gas", "bin" };
 
-    private final int POSTPROCESSING_POINT_GAS_SIZE_MIN = 0;
-    private final int POSTPROCESSING_POINT_GAS_SIZE_MAX = 10;
-    private final int POSTPROCESSING_POINT_GAS_SIZE_DEF = 5;
-
     // Minimum and maximum values for the brightness sliders
     private float POSTPROCESSING_OVERALL_BRIGHTNESS_MIN = 0f;
     private float POSTPROCESSING_OVERALL_BRIGHTNESS_MAX = 10f;
@@ -41,7 +37,7 @@ public class AsteriskSettings extends Settings {
     // Settings for the postprocessing shader
     private float POSTPROCESSING_OVERALL_BRIGHTNESS_DEF = 5f;
     private float POSTPROCESSING_AXES_BRIGHTNESS_DEF = 4f;
-    private float POSTPROCESSING_POINT_GAS_BRIGHTNESS_DEF = 4f;
+    private float POSTPROCESSING_POINT_GAS_BRIGHTNESS_DEF = 10f;
 
     private float POSTPROCESSING_STAR_HALO_BRIGHTNESS_DEF = 4f;
     private float POSTPROCESSING_STAR_BRIGHTNESS_DEF = 4f;
@@ -49,8 +45,8 @@ public class AsteriskSettings extends Settings {
     private float POSTPROCESSING_HUD_BRIGHTNESS_DEF = 4f;
 
     private final float PARTICLE_SIZE_MULTIPLIER_MIN = 1f;
-    private float PARTICLE_SIZE_MULTIPLIER_DEF = 10f;
-    private final float PARTICLE_SIZE_MULTIPLIER_MAX = 100f;
+    private float PARTICLE_SIZE_MULTIPLIER_DEF = 1f;
+    private final float PARTICLE_SIZE_MULTIPLIER_MAX = 20f;
 
     private final int SLIDER_MIN_BLUR_TYPE = 0;
     private final int SLIDER_DEF_BLUR_TYPE = 1;
@@ -58,7 +54,7 @@ public class AsteriskSettings extends Settings {
 
     private final int SLIDER_MIN_BLUR_PASSES = 0;
     private final int SLIDER_DEF_BLUR_PASSES = 1;
-    private final int SLIDER_MAX_BLUR_PASSES = 4;
+    private final int SLIDER_MAX_BLUR_PASSES = 8;
 
     private final int SLIDER_MIN_BLUR_SIZE = 1;
     private final int SLIDER_DEF_BLUR_SIZE = 2;
@@ -87,7 +83,7 @@ public class AsteriskSettings extends Settings {
     private int starHaloBlurPassSetting;
     private int starHaloBlurSizeSetting;
 
-    private float pointGasPointSizeSetting = 5f;
+    private float pointGasPointSizeSetting = 1f;
 
     public static final int STAR_SUBDIVISION = 2;
     public static final int PLANET_SUBDIVISION = 2;
@@ -109,7 +105,7 @@ public class AsteriskSettings extends Settings {
     private final float SLIDER_MIN_POINT_SIZE = 0f;
     private final float SLIDER_MAX_POINT_SIZE = 10f;
 
-    private boolean pointgasSizeDependantOnCameraDistance = true;
+    private boolean pointgasSizeDependantOnCameraDistance = false;
 
     private AsteriskSettings() {
         super();

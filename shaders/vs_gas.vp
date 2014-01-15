@@ -23,7 +23,7 @@ void main() {
     pColor = vec4(MCcolor.rgb,1.0);    
     
     if (PointSizeCameraDistDependant == 1) {
-    	gl_PointSize = min(16.0, max(0,16.0-cameraDist)) * PointSizeMultiplier;
+    	gl_PointSize = min(16.0, max(0,16.0-cameraDist)) * PointSizeMultiplier *0.2;
 	} else {
 		gl_PointSize = 3 * PointSizeMultiplier;
 	}

@@ -253,10 +253,10 @@ public class AsteriskInterfaceWindow extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 settings.setPointGasPointSizeDependantOnCameraDistance(false);
-                settings.setPointGasPointSizeSetting(6);
+                settings.setPointGasPointSizeSetting(1);
                 settings.setPointGasBlurPassSetting(1);
                 settings.setPointGasBlurSizeSetting(2);
-                settings.setPointGasBlurTypeSetting(0);
+                settings.setPointGasBlurTypeSetting(1);
                 settings.setPostprocessingPointGasBrightness(10);
 
                 pointCloudConfig.removeAll();
@@ -266,12 +266,12 @@ public class AsteriskInterfaceWindow extends JPanel {
         ActionListener prettyPresetListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                settings.setPointGasPointSizeDependantOnCameraDistance(true);
-                settings.setPointGasPointSizeSetting(10);
-                settings.setPointGasBlurPassSetting(1);
-                settings.setPointGasBlurSizeSetting(5);
-                settings.setPointGasBlurTypeSetting(5);
-                settings.setPostprocessingPointGasBrightness(50);
+                settings.setPointGasPointSizeDependantOnCameraDistance(false);
+                settings.setPointGasPointSizeSetting(1);
+                settings.setPointGasBlurPassSetting(6);
+                settings.setPointGasBlurSizeSetting(7);
+                settings.setPointGasBlurTypeSetting(8);
+                settings.setPostprocessingPointGasBrightness(15);
 
                 pointCloudConfig.removeAll();
                 createPointCloudPanel(pointCloudConfig);
