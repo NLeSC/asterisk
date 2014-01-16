@@ -294,8 +294,8 @@ public class AsteriskInterfaceWindow extends JPanel {
             }
         };
 
-        targetPanel.add(GoggleSwing.buttonBox("Presets", new GoggleSwing.ButtonBoxItem("Scientific",
-                scientificPresetListener), new GoggleSwing.ButtonBoxItem("Embellished", embellishedPresetListener),
+        targetPanel.add(GoggleSwing.buttonBox("Presets", new GoggleSwing.ButtonBoxItem("Points",
+                scientificPresetListener), new GoggleSwing.ButtonBoxItem("Blobs", embellishedPresetListener),
                 new GoggleSwing.ButtonBoxItem("Gaseous", gaseousPresetListener)));
 
         targetPanel.add(GoggleSwing.checkboxBox("", new GoggleSwing.CheckBoxItem("Size Dependant on camera Distance",
