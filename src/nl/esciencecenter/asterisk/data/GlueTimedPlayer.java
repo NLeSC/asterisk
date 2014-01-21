@@ -429,6 +429,7 @@ public class GlueTimedPlayer implements TimedPlayer {
             }
         }
 
+        stop();
         setFrame(startKeyFrameNumber, true);
 
         if (record) {

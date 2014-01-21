@@ -95,7 +95,7 @@ public class Asterisk {
         int SPHERES = 0;
         int STARS = 100;
         int SPH = 1000;
-        int POINTS = 25000000;
+        int POINTS = 500000;
 
         float COORD_DELTA_MAX = .3f;
         float COLOR_DELTA_MAX = .2f;
