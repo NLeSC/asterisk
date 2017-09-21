@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/9008971.svg)](https://zenodo.org/badge/latestdoi/9008971)
+
 asterisk
 ========
 
