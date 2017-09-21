@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.media.opengl.GL3;
 
 import nl.esciencecenter.asterisk.Star;
+import nl.esciencecenter.esight.exceptions.InverseNotAvailableException;
 import nl.esciencecenter.esight.exceptions.UninitializedException;
 import nl.esciencecenter.esight.math.MatF4;
 import nl.esciencecenter.esight.math.MatrixFMath;
@@ -42,8 +43,7 @@ public class StarModel {
             // System.err.println("Offset Random Value: " + offsetRandomValue);
 
             coords = new VecF3(rawCoords[0], rawCoords[1], rawCoords[2]);
-            color = new VecF4(rawColor[0], rawColor[1], rawColor[2],
-                    rawColor[3]);
+            color = new VecF4(rawColor[0], rawColor[1], rawColor[2], rawColor[3]);
             radius = glueStar.getRadius();
 
             initialized = true;
@@ -60,6 +60,19 @@ public class StarModel {
         MatF4 newM = MVMatrix.mul(MatrixFMath.translate(coords));
         program.setUniformMatrix("MVMatrix", newM);
 
+        program.setUniformMatrix("NormalMatrix", MatrixFMath.getNormalMatrix(newM));
+
+        VecF3 cameraPos;
+        try {
+            MatF4 viewModel = MatrixFMath.inverse(newM);
+            cameraPos = new VecF3(viewModel.get(3), viewModel.get(7), viewModel.get(11));
+        } catch (InverseNotAvailableException e) {
+            cameraPos = new VecF3();
+            e.printStackTrace();
+        }
+
+        program.setUniformVector("CameraPos", cameraPos);
+
         program.setUniformVector("Color", color);
         program.setUniform("OffsetRandomValue", offsetRandomValue);
 
@@ -68,7 +81,11 @@ public class StarModel {
         } catch (UninitializedException e) {
             e.printStackTrace();
         }
-        baseModel.draw(gl, program);
+        try {
+            baseModel.draw(gl, program);
+        } catch (UninitializedException e) {
+            e.printStackTrace();
+        }
     }
 
     public VecF4 getColor() {

@@ -11,32 +11,30 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicSliderUI;
 
 import nl.esciencecenter.asterisk.data.GlueTimedPlayer;
-import nl.esciencecenter.asterisk.interfaces.TimedPlayer;
+import nl.esciencecenter.asterisk.input.AsteriskInputHandler;
+import nl.esciencecenter.esight.math.VecF3;
 import nl.esciencecenter.esight.swing.CustomJSlider;
 import nl.esciencecenter.esight.swing.GoggleSwing;
 
 public class AsteriskInterfaceWindow extends JPanel {
-    public static enum TweakState {
-        NONE, DATA, VISUAL, MOVIE
-    }
-
     private final AsteriskSettings settings = AsteriskSettings.getInstance();
 
     private static final long serialVersionUID = 1L;
@@ -44,15 +42,75 @@ public class AsteriskInterfaceWindow extends JPanel {
     protected CustomJSlider timeBar;
 
     protected JFormattedTextField frameCounter;
-    private TweakState currentConfigState = TweakState.MOVIE;
 
-    public static TimedPlayer timer;
+    public static GlueTimedPlayer timer;
 
-    private final JPanel configPanel;
+    private final JTabbedPane configPanel;
 
-    private final JPanel dataConfig, visualConfig, movieConfig;
+    private final JPanel starConfig, pointCloudConfig, miscConfig, viewConfig, recordingConfig;
+
+    private final AsteriskInputHandler inputHandler = AsteriskInputHandler.getInstance();
+
+    public class KeyFrame {
+        private Component uiElement;
+        private final int frameNumber;
+        private VecF3 rotation;
+        private float viewDist;
+
+        public KeyFrame(int frameNumber) {
+            this.frameNumber = frameNumber;
+        }
+
+        public Component getUiElement() {
+            return uiElement;
+        }
+
+        public void setUiElement(Component uiElement) {
+            this.uiElement = uiElement;
+        }
+
+        public int getFrameNumber() {
+            return frameNumber;
+        }
+
+        public VecF3 getRotation() {
+            return rotation;
+        }
+
+        public void setRotation(VecF3 rotation) {
+            this.rotation = rotation;
+        }
+
+        public float getViewDist() {
+            return viewDist;
+        }
+
+        public void setViewDist(float viewDist) {
+            this.viewDist = viewDist;
+        }
+
+        @Override
+        public int hashCode() {
+            int hash = 1;
+            hash = hash * 17 + frameNumber;
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (other instanceof KeyFrame && ((KeyFrame) other).hashCode() == this.hashCode()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    private final ArrayList<KeyFrame> keyFrames;
 
     public AsteriskInterfaceWindow() {
+        keyFrames = new ArrayList<KeyFrame>();
+
         setLayout(new BorderLayout(0, 0));
 
         timeBar = new CustomJSlider(new BasicSliderUI(timeBar));
@@ -65,51 +123,18 @@ public class AsteriskInterfaceWindow extends JPanel {
         timeBar.setSnapToTicks(true);
 
         timer = new GlueTimedPlayer(timeBar, frameCounter);
+        timer.setScreenshotDirectory(System.getProperty("user.dir") + "/screenshots/");
+        settings.setScreenshotPath(System.getProperty("user.dir") + "/screenshots/");
 
         // Make the menu bar
         final JMenuBar menuBar = new JMenuBar();
         menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.X_AXIS));
 
-        final JMenu options = new JMenu("Options");
-
-        // final JMenuItem makeMovie = new JMenuItem("Make movie.");
-        // makeMovie.addActionListener(new ActionListener() {
-        // @Override
-        // public void actionPerformed(ActionEvent arg0) {
-        // setTweakState(TweakState.MOVIE);
-        // }
-        // });
-        // options.add(makeMovie);
-
-        final JMenuItem showDataPanel = new JMenuItem("Show data config panel.");
-        showDataPanel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                setTweakState(TweakState.DATA);
-            }
-        });
-        options.add(showDataPanel);
-
-        final JMenuItem showVisualPanel = new JMenuItem(
-                "Show visual config panel.");
-        showVisualPanel.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                setTweakState(TweakState.VISUAL);
-            }
-        });
-        options.add(showVisualPanel);
-        menuBar.add(options);
-
-        menuBar.add(Box.createHorizontalGlue());
-
         final JMenuBar menuBar2 = new JMenuBar();
 
-        ImageIcon nlescIcon = GoggleSwing.createResizedImageIcon(
-                "images/ESCIENCE_logo.jpg", "eScienceCenter Logo", 200, 20);
+        ImageIcon nlescIcon = GoggleSwing.createResizedImageIcon("images/ESCIENCE_logo.jpg", "eScienceCenter Logo",
+                200, 20);
         JLabel nlesclogo = new JLabel(nlescIcon);
-        // nlesclogo.setMinimumSize(new Dimension(300, 20));
-        // nlesclogo.setMaximumSize(new Dimension(311, 28));
 
         menuBar2.add(Box.createHorizontalGlue());
         menuBar2.add(nlesclogo);
@@ -127,35 +152,519 @@ public class AsteriskInterfaceWindow extends JPanel {
         final JPanel bottomPanel = createBottomPanel();
 
         // Add the tweaks panels
-        configPanel = new JPanel();
+        configPanel = new JTabbedPane();
         add(configPanel, BorderLayout.WEST);
-        configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.Y_AXIS));
-        configPanel.setPreferredSize(new Dimension(240, 0));
-        configPanel.setVisible(false);
+        // configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.Y_AXIS));
+        configPanel.setPreferredSize(new Dimension(240, 10));
 
-        dataConfig = new JPanel();
-        dataConfig.setLayout(new BoxLayout(dataConfig, BoxLayout.Y_AXIS));
-        dataConfig.setMinimumSize(configPanel.getPreferredSize());
-        createDataTweakPanel();
+        miscConfig = new JPanel();
+        miscConfig.setLayout(new BoxLayout(miscConfig, BoxLayout.Y_AXIS));
+        miscConfig.setMinimumSize(configPanel.getPreferredSize());
+        createMiscPanel(miscConfig);
+        configPanel.addTab("Misc", miscConfig);
 
-        visualConfig = new JPanel();
-        visualConfig.setLayout(new BoxLayout(visualConfig, BoxLayout.Y_AXIS));
-        visualConfig.setMinimumSize(configPanel.getPreferredSize());
-        createVisualTweakPanel();
+        starConfig = new JPanel();
+        starConfig.setLayout(new BoxLayout(starConfig, BoxLayout.Y_AXIS));
+        starConfig.setMinimumSize(configPanel.getPreferredSize());
+        createStarPanel(starConfig);
+        configPanel.addTab("Stars", starConfig);
 
-        movieConfig = new JPanel();
-        movieConfig.setLayout(new BoxLayout(movieConfig, BoxLayout.Y_AXIS));
-        movieConfig.setMinimumSize(configPanel.getPreferredSize());
-        createMovieTweakPanel();
+        pointCloudConfig = new JPanel();
+        pointCloudConfig.setLayout(new BoxLayout(pointCloudConfig, BoxLayout.Y_AXIS));
+        pointCloudConfig.setMinimumSize(configPanel.getPreferredSize());
+        createPointCloudPanel(pointCloudConfig);
+        configPanel.addTab("Point Gas", pointCloudConfig);
+
+        viewConfig = new JPanel();
+        viewConfig.setLayout(new BoxLayout(viewConfig, BoxLayout.Y_AXIS));
+        viewConfig.setMinimumSize(configPanel.getPreferredSize());
+        createViewPanel(viewConfig);
+        configPanel.addTab("View", viewConfig);
+
+        recordingConfig = new JPanel();
+        recordingConfig.setLayout(new BoxLayout(recordingConfig, BoxLayout.Y_AXIS));
+        recordingConfig.setMinimumSize(configPanel.getPreferredSize());
+        createRecordingPanel(recordingConfig);
+        configPanel.addTab("Recording", recordingConfig);
+
+        configPanel.setVisible(true);
 
         add(bottomPanel, BorderLayout.SOUTH);
 
         // Read command line file information
         makeTimer();
 
-        setTweakState(TweakState.VISUAL);
-
         setVisible(true);
+    }
+
+    private void createRecordingPanel(JPanel targetPanel) {
+        ActionListener addKeyFrameListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int frameNumber = settings.getCurrentDescription().getFrameNumber();
+                final KeyFrame newKeyFrame = new KeyFrame(frameNumber);
+
+                if (keyFrames.contains(newKeyFrame)) {
+                    keyFrames.remove(newKeyFrame);
+                }
+
+                ActionListener removeKeyFrameListener = new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        keyFrames.remove(newKeyFrame);
+                        recordingConfig.removeAll();
+                        createRecordingPanel(recordingConfig);
+                        validate();
+                        repaint();
+                    }
+                };
+
+                ArrayList<Component> axesVboxList = new ArrayList<Component>();
+                ArrayList<Component> axesHboxList2 = new ArrayList<Component>();
+
+                VecF3 rotation = inputHandler.getRotation().clone();
+                newKeyFrame.setRotation(rotation);
+                float viewDist = inputHandler.getViewDist();
+                newKeyFrame.setViewDist(viewDist);
+
+                axesHboxList2.add(new JLabel("#: " + frameNumber + " Axes: " + (int) rotation.get(0) + " "
+                        + (int) rotation.get(1) + " " + (int) rotation.get(2)));
+                axesHboxList2.add(Box.createHorizontalGlue());
+                JButton removeButton = new JButton(new ImageIcon("images/RemoveIcon15.png"));
+                removeButton.addActionListener(removeKeyFrameListener);
+                axesHboxList2.add(removeButton);
+
+                axesVboxList.add(GoggleSwing.hBoxedComponents(axesHboxList2, false));
+                newKeyFrame.setUiElement(GoggleSwing.vBoxedComponents(axesVboxList, true));
+
+                keyFrames.add(newKeyFrame);
+
+                recordingConfig.removeAll();
+                createRecordingPanel(recordingConfig);
+                validate();
+                repaint();
+            }
+        };
+
+        ActionListener playSequenceListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                timer.startSequence(keyFrames, false);
+            }
+        };
+
+        ActionListener recordSequenceListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                timer.startSequence(keyFrames, true);
+            }
+        };
+
+        ActionListener clearListListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                keyFrames.clear();
+                recordingConfig.removeAll();
+                createRecordingPanel(recordingConfig);
+                validate();
+                repaint();
+            }
+        };
+
+        for (KeyFrame keyFrame : keyFrames) {
+            targetPanel.add(keyFrame.getUiElement());
+        }
+
+        targetPanel.add(GoggleSwing.buttonBox("", new GoggleSwing.ButtonBoxItem("Add current", addKeyFrameListener),
+                new GoggleSwing.ButtonBoxItem("Play Sequence", playSequenceListener), new GoggleSwing.ButtonBoxItem(
+                        "Record Sequence", recordSequenceListener), new GoggleSwing.ButtonBoxItem("Clear All",
+                        clearListListener)));
+
+    }
+
+    private void createViewPanel(JPanel targetPanel) {
+        final ItemListener orbitCheckboxListener = new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                final JCheckBox source = (JCheckBox) e.getSource();
+                settings.setDoOrbit(source.isSelected());
+            }
+        };
+
+        targetPanel.add(GoggleSwing.checkboxBox("", new GoggleSwing.CheckBoxItem("Orbit?", settings.isDoOrbit(),
+                orbitCheckboxListener)));
+
+        final ItemListener orbitLinkedToPlaybackListener = new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                final JCheckBox source = (JCheckBox) e.getSource();
+                settings.setOrbitLinkedToPlayback(source.isSelected());
+            }
+        };
+
+        targetPanel.add(GoggleSwing.checkboxBox("",
+                new GoggleSwing.CheckBoxItem("Orbit Linked to Playback?", settings.isOrbitLinkedToPlayback(),
+                        orbitLinkedToPlaybackListener)));
+
+        final ChangeListener orbitSpeedSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setOrbitSpeed(source.getValue() / 10f);
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Orbit Speed", orbitSpeedSliderListener, 0f, 10f, 1f,
+                settings.getOrbitSpeed() * 10f, new JLabel("")));
+
+        JFormattedTextField xOrbit = new JFormattedTextField();
+        xOrbit.setValue(new Float(0f));
+        xOrbit.setColumns(4);
+        xOrbit.setMaximumSize(new Dimension(40, 20));
+        xOrbit.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent e) {
+                final JFormattedTextField source = (JFormattedTextField) e.getSource();
+                settings.setXOrbitSpeed((Float) (source.getValue()));
+            }
+        });
+
+        JFormattedTextField yOrbit = new JFormattedTextField();
+        yOrbit.setValue(new Float(1f));
+        yOrbit.setColumns(4);
+        yOrbit.setMaximumSize(new Dimension(40, 20));
+        yOrbit.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent e) {
+                final JFormattedTextField source = (JFormattedTextField) e.getSource();
+                settings.setYOrbitSpeed((Float) source.getValue());
+            }
+        });
+
+        JFormattedTextField zOrbit = new JFormattedTextField();
+        zOrbit.setValue(new Float(0f));
+        zOrbit.setColumns(4);
+        zOrbit.setMaximumSize(new Dimension(40, 20));
+        zOrbit.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent e) {
+                final JFormattedTextField source = (JFormattedTextField) e.getSource();
+                settings.setZOrbitSpeed((Float) source.getValue());
+            }
+        });
+
+        ArrayList<Component> axesVboxList = new ArrayList<Component>();
+        ArrayList<Component> axesHboxList1 = new ArrayList<Component>();
+        ArrayList<Component> axesHboxList2 = new ArrayList<Component>();
+        axesHboxList1.add(Box.createHorizontalGlue());
+
+        axesHboxList1.add(new JLabel("X:"));
+        axesHboxList1.add(xOrbit);
+        axesHboxList1.add(GoggleSwing.horizontalStrut(3));
+        axesHboxList1.add(new JLabel("Y:"));
+        axesHboxList1.add(yOrbit);
+        axesHboxList1.add(GoggleSwing.horizontalStrut(3));
+        axesHboxList1.add(new JLabel("Z:"));
+        axesHboxList1.add(zOrbit);
+
+        axesHboxList1.add(Box.createHorizontalGlue());
+
+        axesHboxList2.add(new JLabel("Orbit direction:"));
+        axesHboxList2.add(Box.createHorizontalGlue());
+
+        axesVboxList.add(GoggleSwing.hBoxedComponents(axesHboxList2, false));
+        axesVboxList.add(GoggleSwing.hBoxedComponents(axesHboxList1, false));
+        targetPanel.add(GoggleSwing.vBoxedComponents(axesVboxList, true));
+
+    }
+
+    private void createMiscPanel(JPanel targetPanel) {
+        final ChangeListener overallBrightnessSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPostprocessingOverallBrightness(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Overall Brightness", overallBrightnessSliderListener,
+                (int) (settings.getPostprocessingOverallBrightnessMin()),
+                (int) (settings.getPostprocessingOverallBrightnessMax()), 1,
+                (int) (settings.getPostprocessingOverallBrightness()), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+
+        final ChangeListener axesBrightnessSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPostprocessingAxesBrightness(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Axes Brightness", axesBrightnessSliderListener,
+                (int) (settings.getPostprocessingAxesBrightnessMin()),
+                (int) (settings.getPostprocessingAxesBrightnessMax()), 1,
+                (int) (settings.getPostprocessingAxesBrightness()), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+
+        final ChangeListener hudBrightnessSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPostprocessingHudBrightness(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("HUD Brightness", hudBrightnessSliderListener,
+                (int) (settings.getPostprocessingHudBrightnessMin()),
+                (int) (settings.getPostprocessingHudBrightnessMax()), 1,
+                (int) (settings.getPostprocessingHudBrightness()), new JLabel("")));
+
+        final ChangeListener sphereBrightnessSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPostprocessingSphereBrightness(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Sphere Brightness", sphereBrightnessSliderListener,
+                (int) (settings.getPostprocessingSphereBrightnessMin()),
+                (int) (settings.getPostprocessingSphereBrightnessMax()), 1,
+                (int) (settings.getPostprocessingSphereBrightness()), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+    }
+
+    private void createPointCloudPanel(JPanel targetPanel) {
+        final ItemListener pointGasDistanceDependantSizeListener = new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                final JCheckBox source = (JCheckBox) e.getSource();
+                settings.setPointGasPointSizeDependantOnCameraDistance(source.isSelected());
+            }
+        };
+
+        final ChangeListener pointGasSizeSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPointGasPointSizeSetting(source.getValue());
+                }
+            }
+        };
+
+        final ChangeListener pointGasBrightnessSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPostprocessingPointGasBrightness(source.getValue());
+                }
+            }
+        };
+
+        final ChangeListener blurPassListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPointGasBlurPassSetting(source.getValue());
+                }
+            }
+        };
+
+        final ChangeListener blurTypeListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPointGasBlurTypeSetting(source.getValue());
+                }
+            }
+        };
+
+        final ChangeListener blurSizeListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPointGasBlurSizeSetting(source.getValue());
+                }
+            }
+        };
+
+        ActionListener scientificPresetListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                settings.setPointGasPointSizeDependantOnCameraDistance(false);
+                settings.setPointGasPointSizeSetting(1);
+                settings.setPointGasBlurPassSetting(1);
+                settings.setPointGasBlurSizeSetting(2);
+                settings.setPointGasBlurTypeSetting(1);
+                settings.setPostprocessingPointGasBrightness(10);
+
+                pointCloudConfig.removeAll();
+                createPointCloudPanel(pointCloudConfig);
+                validate();
+                repaint();
+            }
+        };
+        ActionListener embellishedPresetListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                settings.setPointGasPointSizeDependantOnCameraDistance(false);
+                settings.setPointGasPointSizeSetting(1);
+                settings.setPointGasBlurPassSetting(3);
+                settings.setPointGasBlurSizeSetting(3);
+                settings.setPointGasBlurTypeSetting(6);
+                settings.setPostprocessingPointGasBrightness(25);
+
+                pointCloudConfig.removeAll();
+                createPointCloudPanel(pointCloudConfig);
+                validate();
+                repaint();
+
+            }
+        };
+        ActionListener gaseousPresetListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                settings.setPointGasPointSizeDependantOnCameraDistance(false);
+                settings.setPointGasPointSizeSetting(1);
+                settings.setPointGasBlurPassSetting(6);
+                settings.setPointGasBlurSizeSetting(7);
+                settings.setPointGasBlurTypeSetting(8);
+                settings.setPostprocessingPointGasBrightness(15);
+
+                pointCloudConfig.removeAll();
+                createPointCloudPanel(pointCloudConfig);
+                validate();
+                repaint();
+
+            }
+        };
+
+        targetPanel.add(GoggleSwing.buttonBox("Presets", new GoggleSwing.ButtonBoxItem("Points",
+                scientificPresetListener), new GoggleSwing.ButtonBoxItem("Blobs", embellishedPresetListener),
+                new GoggleSwing.ButtonBoxItem("Gaseous", gaseousPresetListener)));
+
+        targetPanel.add(GoggleSwing.checkboxBox("", new GoggleSwing.CheckBoxItem("Size Dependant on camera Distance",
+                settings.isPointgasSizeDependantOnCameraDistance(), pointGasDistanceDependantSizeListener)));
+
+        targetPanel.add(GoggleSwing.sliderBox("Point Gas Size", pointGasSizeSliderListener,
+                (settings.getPointGasPointSizeMin()), (settings.getPointGasPointSizeMax()), 1,
+                (settings.getPointGasPointSizeSetting()), new JLabel("")));
+        targetPanel.add(GoggleSwing.sliderBox("Point Gas Brightness", pointGasBrightnessSliderListener,
+                (int) (settings.getPostprocessingPointGasBrightnessMin()),
+                (int) (settings.getPostprocessingPointGasBrightnessMax()), 1,
+                (int) (settings.getPostprocessingPointGasBrightness()), new JLabel("")));
+        targetPanel.add(GoggleSwing.sliderBox("Point Gas Blur Type", blurTypeListener, settings.getBlurTypeMin(),
+                settings.getBlurTypeMax(), 1, settings.getPointGasBlurTypeSetting(), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+        targetPanel.add(GoggleSwing.sliderBox("Point Gas Blur Passes", blurPassListener, settings.getBlurPassMin(),
+                settings.getBlurPassMax(), 1, settings.getPointGasBlurPassSetting(), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+        targetPanel.add(GoggleSwing.sliderBox("Point Gas Blur Size", blurSizeListener, settings.getBlurSizeMin(),
+                settings.getBlurSizeMax(), 1, settings.getPointGasBlurSizeSetting(), new JLabel("")));
+    }
+
+    private void createStarPanel(JPanel targetPanel) {
+        final ChangeListener particleSizeMultiplierListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setParticleSizeMultiplier(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Star size multiplier.", particleSizeMultiplierListener,
+                (settings.getParticleSizeMultiplierMin()), (settings.getParticleSizeMultiplierMax()), 1,
+                (int) (settings.getParticleSizeMultiplier()), new JLabel("")));
+
+        final ChangeListener starBrightnessSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPostprocessingStarBrightness(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Star Brightness", starBrightnessSliderListener,
+                (int) (settings.getPostprocessingStarBrightnessMin()),
+                (int) (settings.getPostprocessingStarBrightnessMax()), 1,
+                (int) (settings.getPostprocessingStarBrightness()), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+
+        final ChangeListener starHaloBrightnessSliderListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setPostprocessingStarHaloBrightness(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Star Halo Brightness", starHaloBrightnessSliderListener,
+                (int) (settings.getPostprocessingStarHaloBrightnessMin()),
+                (int) (settings.getPostprocessingStarHaloBrightnessMax()), 1,
+                (int) (settings.getPostprocessingStarHaloBrightness()), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+
+        final ChangeListener blurTypeListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setStarHaloBlurTypeSetting(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Star Halo Blur Type", blurTypeListener, settings.getBlurTypeMin(),
+                settings.getBlurTypeMax(), 1, settings.getStarHaloBlurTypeSetting(), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+
+        final ChangeListener blurPassListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setStarHaloBlurPassSetting(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Star Halo Blur Passes", blurPassListener, settings.getBlurPassMin(),
+                settings.getBlurPassMax(), 1, settings.getStarHaloBlurPassSetting(), new JLabel("")));
+
+        targetPanel.add(GoggleSwing.verticalStrut(1));
+
+        final ChangeListener blurSizeListener = new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                final JSlider source = (JSlider) e.getSource();
+                if (source.hasFocus()) {
+                    settings.setStarHaloBlurSizeSetting(source.getValue());
+                }
+            }
+        };
+        targetPanel.add(GoggleSwing.sliderBox("Star Halo Blur Size", blurSizeListener, settings.getBlurSizeMin(),
+                settings.getBlurSizeMax(), 1, settings.getStarHaloBlurSizeSetting(), new JLabel("")));
+
     }
 
     private JPanel createBottomPanel() {
@@ -163,14 +672,12 @@ public class AsteriskInterfaceWindow extends JPanel {
         bottomPanel.setFocusCycleRoot(true);
         bottomPanel.setFocusTraversalPolicy(new FocusTraversalPolicy() {
             @Override
-            public Component getComponentAfter(Container aContainer,
-                    Component aComponent) {
+            public Component getComponentAfter(Container aContainer, Component aComponent) {
                 return null;
             }
 
             @Override
-            public Component getComponentBefore(Container aContainer,
-                    Component aComponent) {
+            public Component getComponentBefore(Container aContainer, Component aComponent) {
                 return null;
             }
 
@@ -192,20 +699,15 @@ public class AsteriskInterfaceWindow extends JPanel {
             }
         });
 
-        final JButton oneForwardButton = GoggleSwing.createImageButton(
-                "images/media-playback-oneforward.png", "Next", null);
-        final JButton oneBackButton = GoggleSwing.createImageButton(
-                "images/media-playback-onebackward.png", "Previous", null);
-        final JButton rewindButton = GoggleSwing.createImageButton(
-                "images/media-skip-backward.png", "Rewind", null);
-        final JButton screenshotButton = GoggleSwing.createImageButton(
-                "images/camera.png", "Screenshot", null);
-        final JButton playButton = GoggleSwing.createImageButton(
-                "images/media-playback-start.png", "Start", null);
-        final ImageIcon playIcon = GoggleSwing.createImageIcon(
-                "images/media-playback-start.png", "Start");
-        final ImageIcon stopIcon = GoggleSwing.createImageIcon(
-                "images/media-playback-stop.png", "Start");
+        final JButton oneForwardButton = GoggleSwing.createImageButton("images/media-playback-oneforward.png", "Next",
+                null);
+        final JButton oneBackButton = GoggleSwing.createImageButton("images/media-playback-onebackward.png",
+                "Previous", null);
+        final JButton rewindButton = GoggleSwing.createImageButton("images/media-skip-backward.png", "Rewind", null);
+        final JButton screenshotButton = GoggleSwing.createImageButton("images/camera.png", "Screenshot", null);
+        final JButton playButton = GoggleSwing.createImageButton("images/media-playback-start.png", "Start", null);
+        final ImageIcon playIcon = GoggleSwing.createImageIcon("images/media-playback-start.png", "Start");
+        final ImageIcon stopIcon = GoggleSwing.createImageIcon("images/media-playback-stop.png", "Start");
 
         bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.Y_AXIS));
         final JPanel buttonPanel = new JPanel();
@@ -216,13 +718,6 @@ public class AsteriskInterfaceWindow extends JPanel {
         screenshotButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // timer.stop();
-                // final ImauInputHandler inputHandler = ImauInputHandler
-                // .getInstance();
-                // final String fileName = "screenshot: " + "{"
-                // + inputHandler.getRotation().get(0) + ","
-                // + inputHandler.getRotation().get(1) + " - "
-                // + Float.toString(inputHandler.getViewDist()) + "} ";
                 timer.setScreenshotNeeded(true);
             }
         });
@@ -287,15 +782,11 @@ public class AsteriskInterfaceWindow extends JPanel {
         frameCounter.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent e) {
-                final JFormattedTextField source = (JFormattedTextField) e
-                        .getSource();
+                final JFormattedTextField source = (JFormattedTextField) e.getSource();
                 if (source.hasFocus()) {
                     if (source == frameCounter) {
                         if (timer.isInitialized()) {
-                            timer.setFrame(
-                                    ((Number) frameCounter.getValue())
-                                            .intValue() - timeBar.getMinimum(),
-                                    false);
+                            timer.setFrame(((Number) frameCounter.getValue()).intValue() - timeBar.getMinimum(), false);
                         }
                         playButton.setIcon(playIcon);
                     }
@@ -323,449 +814,6 @@ public class AsteriskInterfaceWindow extends JPanel {
         return bottomPanel;
     }
 
-    private void createMovieTweakPanel() {
-        final ItemListener listener = new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent arg0) {
-                setTweakState(TweakState.NONE);
-            }
-        };
-        movieConfig.add(GoggleSwing.titleBox("Movie Creator", listener));
-
-        final ItemListener checkBoxListener = new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                settings.setMovieRotate(e.getStateChange());
-                timer.redraw();
-            }
-        };
-        movieConfig.add(GoggleSwing.checkboxBox(
-                "",
-                new GoggleSwing.CheckBoxItem("Rotation", settings
-                        .getMovieRotate(), checkBoxListener)));
-
-        final JLabel rotationSetting = new JLabel(""
-                + settings.getMovieRotationSpeedDef());
-        final ChangeListener movieRotationSpeedListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setMovieRotationSpeed(source.getValue() * .25f);
-                    rotationSetting.setText(""
-                            + settings.getMovieRotationSpeedDef());
-                }
-            }
-        };
-        movieConfig.add(GoggleSwing.sliderBox("Rotation Speed",
-                movieRotationSpeedListener,
-                (int) (settings.getMovieRotationSpeedMin() * 4f),
-                (int) (settings.getMovieRotationSpeedMax() * 4f), 1,
-                (int) (settings.getMovieRotationSpeedDef() * 4f),
-                rotationSetting));
-
-        movieConfig.add(GoggleSwing.buttonBox("",
-                new GoggleSwing.ButtonBoxItem("Start Recording",
-                        new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                timer.movieMode();
-                            }
-                        })));
-    }
-
-    private void createDataTweakPanel() {
-        final ItemListener listener = new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent arg0) {
-                setTweakState(TweakState.NONE);
-            }
-        };
-        dataConfig.add(GoggleSwing.titleBox("Data Configuration", listener));
-
-        dataConfig.add(GoggleSwing.verticalStrut(1));
-
-        // dataConfig.add(GoggleSwing.radioBox("Level of Detail", new String[] {
-        // "Low", "Medium", "High" },
-        // new ActionListener[] { new ActionListener() {
-        // @Override
-        // public void actionPerformed(ActionEvent arg0) {
-        // settings.setCurrentLOD(0);
-        // timer.redraw();
-        // }
-        // }, new ActionListener() {
-        // @Override
-        // public void actionPerformed(ActionEvent arg0) {
-        // settings.setCurrentLOD(1);
-        // timer.redraw();
-        // }
-        // }, new ActionListener() {
-        // @Override
-        // public void actionPerformed(ActionEvent arg0) {
-        // settings.setCurrentLOD(2);
-        // timer.redraw();
-        // }
-        // } }, "Low"));
-
-        final ChangeListener octreeLODSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setOctreeLOD(source.getValue());
-                }
-            }
-        };
-        dataConfig.add(GoggleSwing.sliderBox(
-                "Octree Detail (lower = slower&better)",
-                octreeLODSliderListener, (settings.getOctreeLODMin()),
-                (settings.getOctreeLODMax()), 1, (settings.getOctreeLOD()),
-                new JLabel("")));
-
-        dataConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener octreeDensitySliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setOctreeDensity(source.getValue());
-                }
-            }
-        };
-        dataConfig.add(GoggleSwing.sliderBox("Octree Density cutoff.",
-                octreeDensitySliderListener,
-                (int) (settings.getOctreeDensityMin()),
-                (int) (settings.getOctreeDensityMax()), 1,
-                (int) (settings.getOctreeDensity()), new JLabel("")));
-
-        dataConfig.add(GoggleSwing.verticalStrut(1));
-
-        // final JComboBox comboBoxColorMaps =
-        // ColormapInterpreter.getLegendJComboBox(new Dimension(200, 25));
-        //
-        // GlueSceneDescription description = settings.getCurrentDescription();
-        //
-        // comboBoxColorMaps.setSelectedItem(ColormapInterpreter.getIndexOfColormap(description.getColorMap()));
-        //
-        // comboBoxColorMaps.setMinimumSize(new Dimension(200, 25));
-        // comboBoxColorMaps.setMaximumSize(new Dimension(200, 25));
-        // dataConfig.add(comboBoxColorMaps);
-        //
-        // dataConfig.add(GoggleSwing.verticalStrut(1));
-        //
-        // final RangeSlider legendSlider = new RangeSlider();
-        // ((RangeSliderUI)
-        // legendSlider.getUI()).setRangeColorMap(description.getColorMap());
-        // legendSlider.setMinimum(0);
-        // legendSlider.setMaximum(100);
-        // legendSlider.setValue(settings.getRangeSliderLowerValue());
-        // legendSlider.setUpperValue(settings.getRangeSliderUpperValue());
-        //
-        // final String[] colorMaps = ColormapInterpreter.getColormapNames();
-        //
-        // final RangeSliderUI frs = ((RangeSliderUI) legendSlider.getUI());
-        // comboBoxColorMaps.addItemListener(new ItemListener() {
-        // @Override
-        // public void itemStateChanged(ItemEvent e) {
-        // settings.setCurrentColorMap(colorMaps[comboBoxColorMaps.getSelectedIndex()]);
-        //
-        // frs.setRangeColorMap(colorMaps[comboBoxColorMaps.getSelectedIndex()]);
-        // }
-        // });
-        // legendSlider.addChangeListener(new ChangeListener() {
-        // @Override
-        // public void stateChanged(ChangeEvent e) {
-        // RangeSlider slider = (RangeSlider) e.getSource();
-        // if (!slider.getValueIsAdjusting()) {
-        // settings.setVariableRange(slider.getValue(), slider.getUpperValue());
-        // }
-        // }
-        // });
-        // dataConfig.add(legendSlider);
-
-        dataConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener particleSizeMultiplierListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setParticleSizeMultiplier(source.getValue());
-                }
-            }
-        };
-        dataConfig.add(GoggleSwing.sliderBox("Particle size multiplier.",
-                particleSizeMultiplierListener,
-                (settings.getParticleSizeMultiplierMin()),
-                (settings.getParticleSizeMultiplierMax()), 1,
-                (int) (settings.getParticleSizeMultiplier()), new JLabel("")));
-
-    }
-
-    private void createVisualTweakPanel() {
-        final ItemListener listener = new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent arg0) {
-                setTweakState(TweakState.NONE);
-            }
-        };
-        visualConfig
-                .add(GoggleSwing.titleBox("Visual Configuration", listener));
-
-        // final ItemListener cblBeamerMode = new ItemListener() {
-        // @Override
-        // public void itemStateChanged(ItemEvent e) {
-        // settings.setInvertGasColor(e.getStateChange());
-        // timer.redraw();
-        // }
-        // };
-        // final ItemListener cblInvertedBackground = new ItemListener() {
-        // @Override
-        // public void itemStateChanged(ItemEvent e) {
-        // settings.setGasInvertedBackgroundColor(e.getStateChange());
-        // timer.redraw();
-        // }
-        // };
-        // final ItemListener cblStereo = new ItemListener() {
-        // @Override
-        // public void itemStateChanged(ItemEvent e) {
-        // settings.setStereo(e.getStateChange());
-        // timer.redraw();
-        // }
-        // };
-        // final ItemListener cblStereoSwitch = new ItemListener() {
-        // @Override
-        // public void itemStateChanged(ItemEvent e) {
-        // settings.setStereoSwitched(e.getStateChange());
-        // timer.redraw();
-        // }
-        // };
-        // visualConfig
-        // .add(GoggleSwing.checkboxBox("",
-        // new GoggleSwing.CheckBoxItem("Beamer mode",
-        // settings.getGasInvertedColor(), cblBeamerMode),
-        // new GoggleSwing.CheckBoxItem("White background",
-        // settings.getGasInvertedBackgroundColor(),
-        // cblInvertedBackground),
-        // new GoggleSwing.CheckBoxItem("Stereo view", settings.getStereo(),
-        // cblStereo),
-        // new GoggleSwing.CheckBoxItem("Stereo left/right switch",
-        // settings.getStereoSwitched(),
-        // cblStereoSwitch)));
-
-        final ChangeListener overallBrightnessSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setPostprocessingOverallBrightness(source
-                            .getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Overall Brightness",
-                overallBrightnessSliderListener,
-                (int) (settings.getPostprocessingOverallBrightnessMin()),
-                (int) (settings.getPostprocessingOverallBrightnessMax()), 1,
-                (int) (settings.getPostprocessingOverallBrightness()),
-                new JLabel("")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener axesBrightnessSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setPostprocessingAxesBrightness(source.getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Axes Brightness",
-                axesBrightnessSliderListener, (int) (settings
-                        .getPostprocessingAxesBrightnessMin()), (int) (settings
-                        .getPostprocessingAxesBrightnessMax()), 1,
-                (int) (settings.getPostprocessingAxesBrightness()), new JLabel(
-                        "")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener hudBrightnessSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setPostprocessingHudBrightness(source.getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("HUD Brightness",
-                hudBrightnessSliderListener, (int) (settings
-                        .getPostprocessingHudBrightnessMin()), (int) (settings
-                        .getPostprocessingHudBrightnessMax()), 1,
-                (int) (settings.getPostprocessingHudBrightness()), new JLabel(
-                        "")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener pointGasBrightnessSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setPostprocessingPointGasBrightness(source
-                            .getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Point Gas Brightness",
-                pointGasBrightnessSliderListener,
-                (int) (settings.getPostprocessingPointGasBrightnessMin()),
-                (int) (settings.getPostprocessingPointGasBrightnessMax()), 1,
-                (int) (settings.getPostprocessingPointGasBrightness()),
-                new JLabel("")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener octreeGasBrightnessSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setPostprocessingOctreeGasBrightness(source
-                            .getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Octree Gas Brightness",
-                octreeGasBrightnessSliderListener,
-                (int) (settings.getPostprocessingOctreeGasBrightnessMin()),
-                (int) (settings.getPostprocessingOctreeGasBrightnessMax()), 1,
-                (int) (settings.getPostprocessingOctreeGasBrightness()),
-                new JLabel("")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener starHaloBrightnessSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setPostprocessingStarHaloBrightness(source
-                            .getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Star Halo Brightness",
-                starHaloBrightnessSliderListener,
-                (int) (settings.getPostprocessingStarHaloBrightnessMin()),
-                (int) (settings.getPostprocessingStarHaloBrightnessMax()), 1,
-                (int) (settings.getPostprocessingStarHaloBrightness()),
-                new JLabel("")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener starBrightnessSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setPostprocessingStarBrightness(source.getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Star Brightness",
-                starBrightnessSliderListener, (int) (settings
-                        .getPostprocessingStarBrightnessMin()), (int) (settings
-                        .getPostprocessingStarBrightnessMax()), 1,
-                (int) (settings.getPostprocessingStarBrightness()), new JLabel(
-                        "")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener sphereBrightnessSliderListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setPostprocessingSphereBrightness(source
-                            .getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Sphere Brightness",
-                sphereBrightnessSliderListener,
-                (int) (settings.getPostprocessingSphereBrightnessMin()),
-                (int) (settings.getPostprocessingSphereBrightnessMax()), 1,
-                (int) (settings.getPostprocessingSphereBrightness()),
-                new JLabel("")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener blurTypeListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setBlurTypeSetting(source.getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Blur Type", blurTypeListener,
-                settings.getBlurTypeMin(), settings.getBlurTypeMax(), 1,
-                settings.getBlurTypeSetting(), new JLabel("")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener blurPassListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setBlurPassSetting(source.getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Blur Passes", blurPassListener,
-                settings.getBlurPassMin(), settings.getBlurPassMax(), 1,
-                settings.getBlurPassSetting(), new JLabel("")));
-
-        visualConfig.add(GoggleSwing.verticalStrut(1));
-
-        final ChangeListener blurSizeListener = new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                final JSlider source = (JSlider) e.getSource();
-                if (source.hasFocus()) {
-                    settings.setBlurSizeSetting(source.getValue());
-                }
-            }
-        };
-        visualConfig.add(GoggleSwing.sliderBox("Blur Size", blurSizeListener,
-                settings.getBlurSizeMin(), settings.getBlurSizeMax(), 1,
-                settings.getBlurSizeSetting(), new JLabel("")));
-
-        // final ChangeListener stereoOcularDistanceListener = new
-        // ChangeListener() {
-        // @Override
-        // public void stateChanged(ChangeEvent e) {
-        // final JSlider source = (JSlider) e.getSource();
-        // if (source.hasFocus()) {
-        // settings.setStereoOcularDistance(source.getValue() / 10f);
-        // }
-        // }
-        // };
-        // visualConfig.add(GoggleSwing.sliderBox("Stereo Ocular Distance",
-        // stereoOcularDistanceListener,
-        // (int) (settings.getStereoOcularDistanceMin() * 10), (int)
-        // (settings.getStereoOcularDistanceMax() * 10),
-        // 1, (int) (settings.getStereoOcularDistance() * 10), new JLabel("")));
-        //
-        // visualConfig.add(GoggleSwing.verticalStrut(1));
-
-    }
-
     private void makeTimer() {
         if (timer.isInitialized()) {
             timer.close();
@@ -774,29 +822,7 @@ public class AsteriskInterfaceWindow extends JPanel {
 
     }
 
-    // Callback methods for the various ui actions and listeners
-    public void setTweakState(TweakState newState) {
-        configPanel.setVisible(false);
-        configPanel.remove(dataConfig);
-        configPanel.remove(visualConfig);
-        // configPanel.remove(movieConfig);
-
-        currentConfigState = newState;
-
-        if (currentConfigState == TweakState.NONE) {
-        } else if (currentConfigState == TweakState.DATA) {
-            configPanel.setVisible(true);
-            configPanel.add(dataConfig, BorderLayout.WEST);
-        } else if (currentConfigState == TweakState.VISUAL) {
-            configPanel.setVisible(true);
-            configPanel.add(visualConfig, BorderLayout.WEST);
-            // } else if (currentConfigState == TweakState.MOVIE) {
-            // configPanel.setVisible(true);
-            // configPanel.add(movieConfig, BorderLayout.WEST);
-        }
-    }
-
-    public static TimedPlayer getTimer() {
+    public static GlueTimedPlayer getTimer() {
         return timer;
     }
 }

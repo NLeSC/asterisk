@@ -5,7 +5,7 @@ in vec3 MCnormal;
 in vec3 MCtexCoord;
 
 out vec3 vertex_normal;
-out vec4 eye_direction;
+out vec3 eye_direction;
 
 uniform mat4 MVMatrix;
 uniform mat4 PMatrix;
@@ -17,9 +17,8 @@ uniform vec3 CameraPos;
 
 void main() 
 {	 
-    vertex_normal = normalize(NormalMatrix * MCnormal);
-    
-    eye_direction = PMatrix * MVMatrix * vec4(CameraPos, 1.0);
+    vertex_normal = normalize(NormalMatrix * MCnormal);    
+    eye_direction = normalize(NormalMatrix * CameraPos);
         
     gl_Position = PMatrix * MVMatrix * SMatrix * ScaleMatrix * MCvertex;
  } 

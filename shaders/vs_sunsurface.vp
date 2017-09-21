@@ -37,7 +37,7 @@ void main()
                         noisevecZ[2] +
                         noisevecZ[3]) * 0.33);
 
-	vec4 vertex = MCvertex - (0.5 * maxIntensity) + (maxIntensity * intensity);
+	vec4 vertex = MCvertex - ((0.5 * maxIntensity) + (maxIntensity * intensity)) * vec4(MCnormal, 1.0);
     
     gl_Position     = PMatrix * MVMatrix * SMatrix * ScaleMatrix * vertex;
 }
